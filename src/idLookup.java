@@ -87,13 +87,25 @@ public class idLookup
     /** The vendor's name, or null if the number is not in the file. */
     public String vendorName(int vendorId)
     {
-        return vendors.get(vendorId);
+        String name = vendors.get(vendorId);
+        if (name != null) {
+            return name;
+        }
+        else {
+            return  "" + vendorId;
+        }
     }
 
     /** The device's name for that vendor, or null if it is not in the file. */
     public String deviceName(int vendorId, int deviceId)
     {
-        return devices.get(key(vendorId, deviceId));
+        String name = devices.get(key(vendorId, deviceId));
+        if (name != null) {
+            return name;
+        }
+        else {
+            return  "" + deviceId;
+        }
     }
 
     /**
