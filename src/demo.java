@@ -27,12 +27,18 @@ public class demo
 
         idLookup usb = idLookup.usb();
         System.out.println("USB devices: " + usbInfo.getCount());
-        for (int i = 0; i < usbInfo.getCount(); i++) {
+        if (usbInfo.getCount() == 0) {
+            System.out.println("  No USB devices have been found");
+        }
+        else {
+            for (int i = 0; i < usbInfo.getCount(); i++) {
             int vendor = usbInfo.getVendorId(i);
             int product = usbInfo.getProductId(i);
             System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s%n", usbInfo.getBusNumber(i),
                               usbInfo.getDeviceNumber(i), vendor, product,
                               usb.vendorName(vendor), usb.deviceName(vendor, product));
+            }
         }
+        
     }
 }
