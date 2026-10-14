@@ -25,10 +25,15 @@ public class usbInfo
         if (devices == null) {
             List<Path> found = new ArrayList<>();
             if (Files.isDirectory(ROOT)) {
+// 				(Debug - luke)
+// 				System.out.printf("Looking through directory: %s \n", ROOT); 
                 try (DirectoryStream<Path> dir = Files.newDirectoryStream(ROOT)) {
-                    for (Path p : dir)
-                        if (Files.exists(p.resolve("idVendor")))  // skip interfaces
+                    for (Path p : dir) {
+// 					(Debug - luke)
+// 					System.out.printf("\t looking at: %s \n",p); 
+		       if (Files.exists(p.resolve("idVendor")))  // skip interfaces
                             found.add(p);
+		}
                 } catch (IOException e) {
                     // leave the list as it is
                 }
