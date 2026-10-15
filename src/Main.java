@@ -2,12 +2,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Main {
+<<<<<<< Updated upstream
 
 	public static idLookup usb;
 	public static idLookup pci;
 
 
 	public static void main(String[] args) {
+=======
+
+	public static void main(String[] args) {
+
+
+		idLookup usb;
+>>>>>>> Stashed changes
 
 		try {
 			usb = idLookup.usb();
@@ -67,6 +75,21 @@ public class Main {
 			System.out.println(error.getMessage());
 			error.printStackTrace();
 		}
+
+		Menu mainMenu = new Menu(
+			"Welcome to System Spec Analyser\n" + 
+			"Options:\n" +
+			"\t1. Processor\n" +
+			"\t2. Memory\n" + 
+			"\t3. USB Devices\n" +
+			"\t4. PCI Devices\n" +
+			"\t5. Quit\n" +
+			"\n" +
+			"Please select an option [1-5]:\n"
+		);
+
+		mainMenu.run();
+		mainMenu.setOption(0,)
 	}
 
 	public static void printPciDevices() {
