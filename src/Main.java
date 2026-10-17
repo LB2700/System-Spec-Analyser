@@ -1,10 +1,11 @@
-import java.io.IOException;
-
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 public class Main {
 	public static void main(String[] args) {
 
 		idLookup usb;
-
+		
 		try {
 			usb = idLookup.usb();
 			System.out.println("USB devices: " + usbInfo.getCount());
@@ -47,5 +48,105 @@ public class Main {
 			System.out.println(error.getMessage());
 			error.printStackTrace();
 		}
+
+	System.out.println("Processors (cores) avaiable: " + Runtime.getRuntime().availableProcessors());
+		
+	//try {
+	//	for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
+	//		if (i.startsWith("cpu cores")){
+	//			System.out.println("There are: " + i + " processers (cores)");
+	//			break;
+	//		}
+	//	}
+	//}catch (java.io.IOException error) {
+	//	System.out.println(error.getMessage());
+	//}
+		
+	//Gets archeitecture, probably not what Mark wants 
+	System.out.println("You have: " + System.getProperty("os.arch"));
+		
+	//Needs to be tested 
+	//try {
+	//	for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
+	//		if (i.startsWith("model name")){
+	//			System.out.println(i);
+	//			break;
+	//		}
+	//	}
+	//}catch (java.io.IOException error) {
+	//	System.out.println(error.getMessage());
+	//}
+
+
+	//https://stackoverflow.com/questions/55050864/detect-cpu-model-information - I don't know how it works, I'll look further into it
+	//try {
+	//String model = Files.lines(Paths.get("/proc/cpuinfo"))
+   	//	.filter(line -> line.startsWith("model name"))
+   	//	.map(line -> line.replaceAll(".*: ", ""))
+   	//	.findFirst().orElse("");
+	//} catch (java.io.IOException error) {
+	//	System.out.println(error.getMessage());
+	//}
+
+	
+
+	//https://support.checkpoint.com/results/sk/sk65143
+	ArrayList<Double> coreLoads = new ArrayList<Double>();
+	for (int i = 0; i < (Runtime.getRuntime().availableProcessors() + 1); i++){
+		try{
+			long[] firstRead = getCpuTimes(i);
+			Thread.sleep(1000);
+			long[] secondRead = getCpuTimes(i);
+
+			long busyDifference = secondRead[0] - firstRead[0];
+			long idleDifference = secondRead[1] - firstRead[1];
+
+			double loadRatio = 100.0 * busyDifference / (busyDifference + idleDifference);
+
+			
+			if (i == 0){
+				double averageLoad = loadRatio / Runtime.getRuntime().availableProcessors();
+				System.out.printf("Average load: " + averageLoad);
+			} else {
+				coreLoads.add(loadRatio);
+			}
+		
+			
+		} catch (InterruptedException e) {
+			System.out.println("Could not sleep");
+		}
+		
+	}
+	for (Double cpuLoad: coreLoads){
+			System.out.println("Cpu " + (cpuLoad + 1) + " has a load of " + cpuLoad);
+	}
+	
+	}
+
+	public static long[] getCpuTimes(int cpuNumber){
+
+		//reads first core in "/proc/stat"
+		String readCore = Files.readAllLines(Path.of("/proc/stat")).get(cpuNumber);
+		
+		//Gets rid of empty space and splits into array
+		String[] arrayOfStrings = readCore.trim().split("\\s+");
+	
+		
+		long idle = 0;
+		long busy = 0;
+		final int IDLE_TIME_INDEX = 4;
+		
+		//e.g cpu 79242 0 74306 842486413 756859 6140 67701 0 ->  index 4 in array is idle (842486413)
+		//turn each value into long and add the values together, exclude "cpu" -> i = 1 and exclude "idle" to find busy count
+		for (int i = 1; i < arrayOfStrings.length; i++) {
+			if (i != IDLE_TIME_INDEX){
+    	    	busy += Long.parseLong(arrayOfStrings[i]);
+			} else { 
+				idle = Long.parseLong(arrayOfStrings[IDLE_TIME_INDEX]);
+			}
+		}
+		long[] busyidle = {busy, idle};
+
+		return busyidle;
 	}
 }
