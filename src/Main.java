@@ -1,100 +1,41 @@
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Scanner;
 
-public class Main {
+public class Main
+{
+    public static void main(String[] args) 
+    {
+        Scanner scanner = new Scanner(System.in);
 
-	public static idLookup usb;
-	public static idLookup pci;
+        while (true) 
+        {
+            System.out.println("Which memory information do you want to see?");
+            System.out.println("Total memory (1)");
+            System.out.println("Used memory (2)");
+            System.out.println("Memory usage percentage (3)");
+            System.out.println("Exit (4)");
+            int choice = scanner.nextInt();
 
+            if(memInfo.getTotal() == -1)
+            {
+                System.out.println("Error reading memory information. Please Use a Linux machine.");
+                break;
+            }
 
-	public static void main(String[] args) {
-
-		try {
-			usb = idLookup.usb();
-			System.out.println("USB devices: " + usbInfo.getCount());
-			if (usbInfo.getCount() == 0) {
-			    System.out.println("  No USB devices have been found");
-			}
-			else {
-			    for (int i = 0; i < usbInfo.getCount(); i++) {
-			    int vendor = usbInfo.getVendorId(i);
-			    int product = usbInfo.getProductId(i);
-			    System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s%n", usbInfo.getBusNumber(i),
-			                      usbInfo.getDeviceNumber(i), vendor, product,
-			                      usb.vendorName(vendor), usb.deviceName(vendor, product));
-			    }
-			}
-		// } catch (IOException error) {
-		// 	System.out.println(error.getMessage());
-		// 	error.printStackTrace();
-		} catch (Exception error) {
-			System.out.println(error.getMessage());
-			error.printStackTrace();
-		}
-
-
-		// TODO: put all this in its own method
-		ArrayList<Integer> sortedByName = new ArrayList<>();		
-		ArrayList<Integer> sortedByBus = new ArrayList<>();
-		
-		try {
-			pci = idLookup.pci();
-	        if (pciInfo.getCount() == 0) {
-	        	System.out.println("\t No PCI devices have been found");
-	        }
-	        else {
-
-	            // populate arrays with indecies that point to PCI devices
-	            for (int i = 0; i < pciInfo.getCount(); i++) {
-					sortedByName.add(i);
-					sortedByBus.add(i);
-	       		}
-				
-	       		// sort arrays
-	       		sortedByName.sort((a, b) -> {return pciInfo.getVendorId(a) - pciInfo.getVendorId(b);});	       	
-	       		sortedByBus.sort((a, b) -> {return pciInfo.getBus(a) - pciInfo.getBus(b);});
-
-
-				// uncomment to print whichever sorted version you want. User input through CLI will decide this - luke
-	       		//printPciDevices(sortedByName);	       	
-	       		//printPciDevices(sortedByBus);
-
-				// unsorted version stays printed for now
-	       		printPciDevices();
-
-			}
-		} catch (Exception error) {
-			System.out.println(error.getMessage());
-			error.printStackTrace();
-		}
-	}
-
-	public static void printPciDevices() {
-		System.out.println("PCI devices: " + pciInfo.getCount());
-    	for (int i = 0; i < pciInfo.getCount(); i++) {
-          	printPciDevice(i);
-   		}
-	}
-
-	public static void printPciDevices(ArrayList<Integer> indexArray) throws Exception {
-		System.out.println("PCI devices: " + pciInfo.getCount());
-		for (int i: indexArray) {
-			if (i >= pciInfo.getCount()) {
-				throw new Exception("indexArray contains indecies larger than the size of deviceInfo.");		
-			}
-			printPciDevice(i);
-		}
-	}
-
-	public static void printPciDevice(Integer i) {
-		int vendor = pciInfo.getVendorId(i);
-		int device = pciInfo.getDeviceId(i);
-		System.out.printf("  %s  %04x:%04x  %s %s%n",
-			pciInfo.getAddress(i),
-			vendor,
-			device,
-			pci.vendorName(vendor),
-			pci.deviceName(vendor, device)
-		);
-	}	
+            switch(choice)
+            {
+                case 1:
+                    System.out.println("Total memory: " + memInfo.getTotal() / 1024 + " MB");
+                    break;
+                case 2:
+                    System.out.println("Total used memory: " + memInfo.getUsed() / 1024 + " MB");
+                    break;
+                case 3:
+                    System.out.println("Percentage of memory used: " + ((double) memInfo.getUsed() / memInfo.getTotal() * 100) + "%");
+                    break;
+                case 4:
+                    System.out.println("Exiting...");
+                    break;
+            }
+        }
+    }
 }
