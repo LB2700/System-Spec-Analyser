@@ -63,7 +63,7 @@ public class Main {
 	//	System.out.println(error.getMessage());
 	//}
 		
-	//Gets archeitecture, probably not what Mark wants 
+	//Gets archeitecture, not what the requirements wants, even then it's something cool to add
 	System.out.println("You have: " + System.getProperty("os.arch"));
 		
 	//Needs to be tested 
@@ -91,54 +91,85 @@ public class Main {
 	
 	//https://support.checkpoint.com/results/sk/sk65143
 	int numOfCores = Runtime.getRuntime().availableProcessors();
+	
 	ArrayList<Double> coreLoads = new ArrayList<Double>();
+	ArrayList<Double> idleR1 = new ArrayList<Double>();
+	ArrayList<Double> busyR1 = new ArrayList<Double>();
+	ArrayList<Double> idleR2 = new ArrayList<Double>();
+	ArrayList<Double> busyR2 = new ArrayList<Double>();
+
 	try {
 		List<String> coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
 		for (int i = 0; i < (numOfCores + 1); i++){
 			
 			String coreInfo = coreInfoLines.get(i);
-			getCpuTimes(coreInfo);
-
 			long[] firstRead = getCpuTimes(coreInfo);
-			Thread.sleep(1000);
-			long[] secondRead = getCpuTimes(coreInfo);
+			double busy1 = (double)firstRead[0];
+			double idle1 = (double)firstRead[1];
 
-			long busyDifference = secondRead[0] - firstRead[0];
-			long idleDifference = secondRead[1] - firstRead[1];
-
-			double loadRatio = 100.0 * busyDifference / (busyDifference + idleDifference);
-
-			if (i == 0){
-				double averageLoad = loadRatio / Runtime.getRuntime().availableProcessors();
-				System.out.printf("Average load: " + averageLoad);
-			} else {
-				coreLoads.add(loadRatio);
-			}
+			busyR1.add(busy1);
+			idleR1.add(idle1);
 		}
 	} catch (Exception e) {
 		System.out.println(e.getMessage());
-		//e.printStackTrace();
-	}
-	for (Double cpuLoad: coreLoads){
-			System.out.println("Cpu has a load of " + cpuLoad);
 	}
 	
+	try {
+		Thread.sleep(1000);
+	} catch (Exception e){
+		System.out.println(e.getMessage());
+	}
+
+	try {
+		List<String> coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
+		for (int i = 0; i < (numOfCores + 1); i++){
+			
+			String coreInfo = coreInfoLines.get(i);
+			long[] secondRead = getCpuTimes(coreInfo);
+			double busy2 = (double)secondRead[0];
+			double idle2 = (double)secondRead[1];
+
+			busyR2.add(busy2);
+			idleR2.add(idle2);
+		}
+	} catch (Exception e) {
+		System.out.println(e.getMessage());
+	}
+
+	ArrayList<Double> busyDifference = new ArrayList<Double>();
+	ArrayList<Double> idleDifference = new ArrayList<Double>();
+	ArrayList<Double> loadRatio = new ArrayList<Double>();
+
+	for (int i = 0; i < idleR1.size(); i++) {
+		
+		busyDifference.add(busyR2.get(i) - busyR1.get(i));
+		idleDifference.add(idleR2.get(i) - idleR1.get(i));
+
+		double load = 100.0 * busyDifference.get(i) / (busyDifference.get(i) + idleDifference.get(i));
+		loadRatio.add(load);
+	}
+
+	double totalLoad = 0;
+	
+	for (int i = 1; i < loadRatio.size(); i++) {
+		System.out.println("Cpu: " + i + "has a load of " + loadRatio.get(i) + "%");
+		totalLoad += loadRatio.get(i);
+	}
+
+	double averageLoad = totalLoad / numOfCores;
+	System.out.println("Average Cpu load: " + averageLoad + "%");
 	}
 
 	public static long[] getCpuTimes(String coreInfo){
-
-		//reads first core in "/proc/stat"
-		//String readCore = Files.readAllLines(Path.of("/proc/stat")).get(cpuNumber);
-		
 		//Gets rid of empty space and splits into array
 		String[] arrayOfStrings = coreInfo.trim().split("\\s+");
 	
-		
 		long idle = 0;
 		long busy = 0;
+
+		//e.g cpu 79242 0 74306 842486413 756859 6140 67701 0 ->  index 4 in array is idle (842486413)
 		final int IDLE_TIME_INDEX = 4;
 		
-		//e.g cpu 79242 0 74306 842486413 756859 6140 67701 0 ->  index 4 in array is idle (842486413)
 		//turn each value into long and add the values together, exclude "cpu" -> i = 1 and exclude "idle" to find busy count
 		for (int i = 1; i < arrayOfStrings.length; i++) {
 			if (i != IDLE_TIME_INDEX){
