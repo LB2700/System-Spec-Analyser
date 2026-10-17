@@ -1,6 +1,7 @@
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 public class Main {
 	public static void main(String[] args) {
 
@@ -87,49 +88,50 @@ public class Main {
 	//} catch (java.io.IOException error) {
 	//	System.out.println(error.getMessage());
 	//}
-
 	
-
 	//https://support.checkpoint.com/results/sk/sk65143
+	int numOfCores = Runtime.getRuntime().availableProcessors();
 	ArrayList<Double> coreLoads = new ArrayList<Double>();
-	for (int i = 0; i < (Runtime.getRuntime().availableProcessors() + 1); i++){
-		try{
-			long[] firstRead = getCpuTimes(i);
+	try {
+		List<String> coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
+		for (int i = 0; i < (numOfCores + 1); i++){
+			
+			String coreInfo = coreInfoLines.get(i);
+			getCpuTimes(coreInfo);
+
+			long[] firstRead = getCpuTimes(coreInfo);
 			Thread.sleep(1000);
-			long[] secondRead = getCpuTimes(i);
+			long[] secondRead = getCpuTimes(coreInfo);
 
 			long busyDifference = secondRead[0] - firstRead[0];
 			long idleDifference = secondRead[1] - firstRead[1];
 
 			double loadRatio = 100.0 * busyDifference / (busyDifference + idleDifference);
 
-			
 			if (i == 0){
 				double averageLoad = loadRatio / Runtime.getRuntime().availableProcessors();
 				System.out.printf("Average load: " + averageLoad);
 			} else {
 				coreLoads.add(loadRatio);
 			}
-		
-			
-		} catch (InterruptedException e) {
-			System.out.println("Could not sleep");
 		}
-		
+	} catch (Exception e) {
+		System.out.println(e.getMessage());
+		//e.printStackTrace();
 	}
 	for (Double cpuLoad: coreLoads){
-			System.out.println("Cpu " + (cpuLoad + 1) + " has a load of " + cpuLoad);
+			System.out.println("Cpu has a load of " + cpuLoad);
 	}
 	
 	}
 
-	public static long[] getCpuTimes(int cpuNumber){
+	public static long[] getCpuTimes(String coreInfo){
 
 		//reads first core in "/proc/stat"
-		String readCore = Files.readAllLines(Path.of("/proc/stat")).get(cpuNumber);
+		//String readCore = Files.readAllLines(Path.of("/proc/stat")).get(cpuNumber);
 		
 		//Gets rid of empty space and splits into array
-		String[] arrayOfStrings = readCore.trim().split("\\s+");
+		String[] arrayOfStrings = coreInfo.trim().split("\\s+");
 	
 		
 		long idle = 0;
