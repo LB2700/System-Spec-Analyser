@@ -74,7 +74,7 @@ public class Main {
 
 		// Multiple menus can be defined. The main menu might call start() on another menu in response to the user selecting an option
 		Menu mainMenu = new Menu(
-			"Welcome to System Spec Analyser\n" + 
+			"Welcome to System Spec Analyser\n\n" + 
 			"Options:\n" +
 			"\t1. Processor\n" +
 			"\t2. Memory\n" + 
@@ -83,7 +83,18 @@ public class Main {
 			"\t5. Quit\n\n", 5
 		);
 
-		mainMenu.setOption(4, Main::printPciDevices); // connects the number 4 option to actually running a function
+		Menu pciMenu = new Menu(
+			"Options:\n" +
+			"\t 1. List all PCI Devices\n" + 
+			"\t 2. Sort and List all PCI Devices\n" +
+			"\t 3. PCI device detailed view\n" +
+			"\t 4. Back\n\n", 4
+		);
+
+		pciMenu.setOption(4, () -> {mainMenu.start(userInput);});
+		pciMenu.setOnStart(() -> {System.out.println("Hello World");});
+
+		mainMenu.setOption(4, () -> {pciMenu.start(userInput);}); // connects the number 4 option to actually running a function
 		mainMenu.start(userInput);
 	}
 

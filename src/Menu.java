@@ -10,6 +10,7 @@ public class Menu {
 	private int optionCount;
 	
 	private ArrayList<Runnable> menuOptions = new ArrayList<>();
+	private Runnable onStart = () -> {return;};
 	
 	public Menu(String message, int optionCount) {
 		this.message = message;
@@ -22,8 +23,14 @@ public class Menu {
 		for (int i = 0; i < optionCount; i++) this.menuOptions.add(Menu::unsetOption);
 	}
 
-	// where every menu actually starts
-	public void starts(Scanner scanner) throws RuntimeException {
+	// this is where every menu starts
+	public void start(Scanner scanner) throws RuntimeException {
+	
+		 // runs a function before the message prints. 
+		 // There might be a use case to run function after message.
+		 // Maybe add attribute to decide whether to print before or after the onStart function. Defaulting to before
+		onStart.run();
+		
 		System.out.print(message); // prints out the main body of the menu. This can be literally anything and is defined in the Menus constructor
 
 		String res; // user response
@@ -53,6 +60,7 @@ public class Menu {
 				run the function linked to the selected option index. Not garunteed to be set. If 
 				an unset function is chosen by the user then the program will crash. 
 				 */
+				System.out.print("-------------------------------------------------\n");
 				menuOptions.get(selectedOption-1).run();
 			} else {
 				System.out.print(invalidInputMessage);
@@ -67,6 +75,10 @@ public class Menu {
 	// link a function to an option index
 	public void setOption(int index, Runnable optionMethod) {
 		menuOptions.set(index-1, optionMethod);
+	}
+
+	public void setOnStart(Runnable onStart) {
+		this.onStart = onStart;
 	}
 
 	// static default option function
