@@ -72,6 +72,7 @@ public class Main {
 
 		Scanner userInput = new Scanner(System.in);
 
+		// Multiple menus can be defined. The main menu might call start() on another menu in response to the user selecting an option
 		Menu mainMenu = new Menu(
 			"Welcome to System Spec Analyser\n" + 
 			"Options:\n" +
@@ -82,8 +83,8 @@ public class Main {
 			"\t5. Quit\n\n", 5
 		);
 
-		mainMenu.setOption(4,Main::printPciDevices);
-		mainMenu.run(userInput);
+		mainMenu.setOption(4, Main::printPciDevices); // connects the number 4 option to actually running a function
+		mainMenu.start(userInput);
 	}
 
 	public static void printPciDevices() {
