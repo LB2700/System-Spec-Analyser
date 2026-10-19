@@ -28,9 +28,9 @@ public class usbInfo
 
     /* Test Case file locations */
     /* Test Case: No USB devices found */
-    //private static final Path ROOT = sysFile.path("src/SysProjectTestCases/NoUSBs");
+    //private static final Path ROOT = sysFile.path("SysProjectTestCases/NoUSBs");
     /* Test Case: No name found */
-    //private static final Path ROOT = sysFile.path("src/SysProjectTestCases/FakeUSBs");
+    //private static final Path ROOT = sysFile.path("SysProjectTestCases/FakeUSBs");
     
     private static List<Path> list()
     {
