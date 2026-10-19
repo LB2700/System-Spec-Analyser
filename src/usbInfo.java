@@ -20,13 +20,29 @@ public class usbInfo
     private static final Path ROOT = sysFile.path("/sys/bus/usb/devices");
     private static List<Path> devices;
 
+
+    //READ ME
+    // To run the test cases you need to compile the java files through the terminal not a IDE
+    // Comment out the original file location for ROOT
+
+
+    /* Test Case file locations */
+    /* Test Case: No USB devices found */
+    //private static final Path ROOT = sysFile.path("/SysProjectTestCases/NoUSBs");
+    /* Test Case: No name found */
+    //private static final Path ROOT = sysFile.path("SysProjectTestCases/FakeUSBs");
+    
     private static List<Path> list()
     {
+        //Debug - Jonathan
+        //System.out.println("File is checking devices");
         if (devices == null) {
             List<Path> found = new ArrayList<>();
+            //Debug - Jonathan
+            //System.out.println("File is checking the ROOT folder");
             if (Files.isDirectory(ROOT)) {
 // 				(Debug - luke)
-// 				System.out.printf("Looking through directory: %s \n", ROOT); 
+//				System.out.printf("Looking through directory: %s \n", ROOT); 
                 try (DirectoryStream<Path> dir = Files.newDirectoryStream(ROOT)) {
                     for (Path p : dir) {
 // 					(Debug - luke)
@@ -37,6 +53,10 @@ public class usbInfo
                 } catch (IOException e) {
                     // leave the list as it is
                 }
+            }
+            else {
+                //Debug - Jonathan
+                System.out.println("File didnt recognise root");
             }
             // lsusb order: by bus number, then device number
             found.sort(Comparator.comparingLong((Path p) -> sysFile.number(p.resolve("busnum")))
