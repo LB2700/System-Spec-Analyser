@@ -52,42 +52,31 @@ public class Main {
 
 	System.out.println("Processors (cores) avaiable: " + Runtime.getRuntime().availableProcessors());
 		
-	//try {
-	//	for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
-	//		if (i.startsWith("cpu cores")){
-	//			System.out.println("There are: " + i + " processers (cores)");
-	//			break;
-	//		}
-	//	}
-	//}catch (java.io.IOException error) {
-	//	System.out.println(error.getMessage());
-	//}
+	try {
+	for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
+	if (i.startsWith("cpu cores")){
+	System.out.println("There are: " + i + " processers (cores)");
+	break;
+	}
+	}
+	}catch (java.io.IOException error) {
+	System.out.println(error.getMessage());
+	}
 		
 	//Gets archeitecture, not what the requirements wants, even then it's something cool to add
 	System.out.println("You have: " + System.getProperty("os.arch"));
 		
 	//Needs to be tested 
-	//try {
-	//	for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
-	//		if (i.startsWith("model name")){
-	//			System.out.println(i);
-	//			break;
-	//		}
-	//	}
-	//}catch (java.io.IOException error) {
-	//	System.out.println(error.getMessage());
-	//}
-
-
-	//https://stackoverflow.com/questions/55050864/detect-cpu-model-information - I don't know how it works, I'll look further into it
-	//try {
-	//String model = Files.lines(Paths.get("/proc/cpuinfo"))
-   	//	.filter(line -> line.startsWith("model name"))
-   	//	.map(line -> line.replaceAll(".*: ", ""))
-   	//	.findFirst().orElse("");
-	//} catch (java.io.IOException error) {
-	//	System.out.println(error.getMessage());
-	//}
+	try {
+	for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
+	if (i.startsWith("model name")){
+	System.out.println(i);
+	break;
+	}
+	}
+	}catch (java.io.IOException error) {
+	System.out.println(error.getMessage());
+	}
 	
 	//https://support.checkpoint.com/results/sk/sk65143
 	int numOfCores = Runtime.getRuntime().availableProcessors();
@@ -103,6 +92,8 @@ public class Main {
 		for (int i = 0; i < (numOfCores + 1); i++){
 			
 			String coreInfo = coreInfoLines.get(i);
+			System.out.println(coreInfo);
+			
 			long[] firstRead = getCpuTimes(coreInfo);
 			double busy1 = (double)firstRead[0];
 			double idle1 = (double)firstRead[1];
