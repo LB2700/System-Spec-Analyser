@@ -35,6 +35,7 @@ public class Main {
 		// showCpuArch();
 		// showCpuModelName();
 		// showCpuUsage();
+		// showCpuTemperature();
 	
 
 		Scanner userInput = new Scanner(System.in);
@@ -321,4 +322,14 @@ public class Main {
 		busyR.add((double)busyidle[0]);
 		idleR.add((double)busyidle[1]);
 	}
+	public static void showCpuTemperature() {
+	//https://askubuntu.com/questions/617368/temperatures-files-location
+	try{
+    	String temp = Files.readString(Path.of("/sys/class/thermal/thermal_zone0/temp"));
+		//to get degrees divide by 1000
+		System.out.println("Cpu temperature: " + Double.parseDouble(temp.trim()) / 1000 + " degrees celcius");
+	} catch (Exception e) {
+		System.out.println(e.getMessage());
+	}
+	}	
 }
