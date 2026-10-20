@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Scanner;
+
 
 public class Main {
 
@@ -73,8 +75,8 @@ public class Main {
 			System.out.println(error.getMessage());
 			error.printStackTrace();
 		}
-
-	System.out.println("Processors (cores) avaiable: " + Runtime.getRuntime().availableProcessors());
+    
+    	System.out.println("Processors (cores) avaiable: " + Runtime.getRuntime().availableProcessors());
 		
 	try {
 	for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
@@ -173,6 +175,49 @@ public class Main {
 
 	double averageLoad = totalLoad / numOfCores;
 	System.out.println("Average Cpu load: " + averageLoad + "%");
+
+		Scanner userInput = new Scanner(System.in);
+
+		// Multiple menus can be defined. The main menu might call start() on another menu in response to the user selecting an option
+		Menu mainMenu = new Menu(
+			"Welcome to System Spec Analyser\n\n" + 
+			"Options:\n" +
+			"\t1. Processor\n" +
+			"\t2. Memory\n" + 
+			"\t3. USB Devices\n" +
+			"\t4. PCI Devices\n" +
+			"\t5. Quit\n\n", 5
+		);
+
+		Menu pciMenu = new Menu(
+			"Options:\n" +
+			"\t 1. List all PCI Devices\n" + 
+			"\t 2. Sort and List all PCI Devices\n" +
+			"\t 3. PCI device detailed view\n" +
+			"\t 4. Back\n\n", 4
+		);
+
+		Menu memoryMenu = new Menu(
+			"Options:\n" +
+			"\t 1. Total Memory\n" + 
+			"\t 2. Total Used Memory\n" +
+			"\t 3. Percentage of Memory Used\n" +
+			"\t 4. Back\n\n", 4
+		);
+
+		pciMenu.setOption(4, () -> {mainMenu.start(userInput);});
+		pciMenu.setOnStart(() -> {System.out.println("Hello World");});
+
+		memoryMenu.setOption(1, () -> {memInfo.PrintTotalMemory();});
+		memoryMenu.setOption(2, () -> {memInfo.PrintTotalUsedMemory();});
+		memoryMenu.setOption(3, () -> {memInfo.PrintPercentageOfMemoryUsed();});
+		memoryMenu.setOption(4, () -> {mainMenu.start(userInput);});
+
+		memoryMenu.setOnStart(() -> {System.out.println("Hello World");});
+		
+		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); // connects the number 2 option to actually running a function
+		mainMenu.setOption(4, () -> {pciMenu.start(userInput);}); // connects the number 4 option to actually running a function
+		mainMenu.start(userInput);
 	}
 
 	public static long[] getCpuTimes(String coreInfo){
@@ -225,5 +270,5 @@ public class Main {
 			pci.vendorName(vendor),
 			pci.deviceName(vendor, device)
 		);
-	}	
+	}
 }
