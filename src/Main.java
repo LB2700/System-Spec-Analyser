@@ -77,7 +77,7 @@ public class Main {
 		mainMenu.setOption(4, () -> {pciMenu.start(userInput);}); // connects the number 4 option to actually running a function
 		mainMenu.start(userInput);
 	}
-
+	//Cpu Requirement 1
 	public static long[] getCpuTimes(String coreInfo){
 		//Gets rid of empty space and splits into array
 		String[] arrayOfStrings = coreInfo.trim().split("\\s+");
@@ -255,7 +255,7 @@ public class Main {
 				// "model name      : QEMU Virtual CPU version 2.5+"
 				// needs to extract the model name and print something better looking
 				// "Model Name: <MODEL_NAME>"
-					System.out.println(i);
+					System.out.println("Model Name: " + i);
 					break;
 				}
 			}
@@ -265,76 +265,62 @@ public class Main {
 	}
 
 	public static void showCpuUsage() {
-		//https://support.checkpoint.com/results/sk/sk65143
-		int numOfCores = Runtime.getRuntime().availableProcessors();
-	
-		ArrayList<Double> coreLoads = new ArrayList<Double>();
+		//https://support.checkpoint.com/results/sk/sk65143 - please read
+		
 		ArrayList<Double> idleR1 = new ArrayList<Double>();
 		ArrayList<Double> busyR1 = new ArrayList<Double>();
 		ArrayList<Double> idleR2 = new ArrayList<Double>();
 		ArrayList<Double> busyR2 = new ArrayList<Double>();
 
-		try {
-			List<String> coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
-			for (int i = 0; i < (numOfCores + 1); i++){
-				
-				String coreInfo = coreInfoLines.get(i);
-				System.out.println(coreInfo);
-				
-				long[] firstRead = getCpuTimes(coreInfo);
-				double busy1 = (double)firstRead[0];
-				double idle1 = (double)firstRead[1];
-
-				busyR1.add(busy1);
-				idleR1.add(idle1);
-			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		
-		try {
-			Thread.sleep(1000);
-		} catch (Exception e){
-			System.out.println(e.getMessage());
-		}
-
-		try {
-			List<String> coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
-			for (int i = 0; i < (numOfCores + 1); i++){
-				
-				String coreInfo = coreInfoLines.get(i);
-				long[] secondRead = getCpuTimes(coreInfo);
-				double busy2 = (double)secondRead[0];
-				double idle2 = (double)secondRead[1];
-
-				busyR2.add(busy2);
-				idleR2.add(idle2);
-			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-
 		ArrayList<Double> busyDifference = new ArrayList<Double>();
 		ArrayList<Double> idleDifference = new ArrayList<Double>();
 		ArrayList<Double> loadRatio = new ArrayList<Double>();
 
-		for (int i = 0; i < idleR1.size(); i++) {
+		try {
+			int numOfCores = Runtime.getRuntime().availableProcessors();
+
+			List<String> coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
+			for (int i = 0; i < (numOfCores + 1); i++){
+
+				String coreInfo = coreInfoLines.get(i);
+				getLoad(idleR1,busyR1, coreInfo);
+			}
 			
-			busyDifference.add(busyR2.get(i) - busyR1.get(i));
-			idleDifference.add(idleR2.get(i) - idleR1.get(i));
+			Thread.sleep(1000);
+	
+			coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
+			for (int i = 0; i < (numOfCores + 1); i++){
 
-			double load = 100.0 * busyDifference.get(i) / (busyDifference.get(i) + idleDifference.get(i));
-			loadRatio.add(load);
-		}
+				String coreInfo = coreInfoLines.get(i);
+				getLoad(idleR2,busyR2, coreInfo);
+			}
 
-		double totalLoad = 0;
+			for (int i = 0; i < idleR1.size(); i++) {
+			
+				busyDifference.add(busyR2.get(i) - busyR1.get(i));
+				idleDifference.add(idleR2.get(i) - idleR1.get(i));
+
+				double load = 100.0 * busyDifference.get(i) / (busyDifference.get(i) + idleDifference.get(i));
+				loadRatio.add(load);
+			}
+
+			double totalLoad = 0;
 		
-		for (int i = 1; i < loadRatio.size(); i++) {
-			System.out.println("Cpu: " + i + "has a load of " + loadRatio.get(i) + "%");
-			totalLoad += loadRatio.get(i);
-		}
+			for (int i = 1; i < loadRatio.size(); i++) {
+				System.out.println("Cpu: " + i + "has a load of " + loadRatio.get(i) + "%");
+				totalLoad += loadRatio.get(i);
+			}
 
-		double averageLoad = totalLoad / numOfCores;
-		System.out.println("Average Cpu load: " + averageLoad + "%");
+			double averageLoad = totalLoad / numOfCores;
+			System.out.println("Average Cpu load: " + averageLoad + "%");
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	public static void getLoad(ArrayList<Double> idleR, ArrayList<Double> busyR, String coreInfo) {
+		long[] busyidle = getCpuTimes(coreInfo);
+		busyR.add((double)busyidle[0]);
+		idleR.add((double)busyidle[1]);
 	}
 }
