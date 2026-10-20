@@ -86,12 +86,14 @@ public class Main {
 		long idle = 0;
 		long busy = 0;
 
-		//e.g cpu 79242 0 74306 842486413 756859 6140 67701 0 ->  index 4 in array is idle (842486413)
+		//e.g cpu 79242 0 74306 842486413 756859 6140 67701 0 ->  index 4 in array is idle (842486413) index 5 is waiting for I/O to complete (756859)
 		final int IDLE_TIME_INDEX = 4;
+		final int IO_TIME_INDEX = 5;
 		
-		//turn each value into long and add the values together, exclude "cpu" -> i = 1 and exclude "idle" to find busy count
+		//turn each value into long and add the values together, exclude "cpu" -which is at index 0 hence i = 1 
+		//And exclude "idle" and "IO" to find busy time
 		for (int i = 1; i < arrayOfStrings.length; i++) {
-			if (i != IDLE_TIME_INDEX){
+			if (i != IDLE_TIME_INDEX | i != IO_TIME_INDEX){
     	    	busy += Long.parseLong(arrayOfStrings[i]);
 			} else { 
 				idle = Long.parseLong(arrayOfStrings[IDLE_TIME_INDEX]);
