@@ -251,11 +251,9 @@ public class Main {
 		try {
 			for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
 				if (i.startsWith("model name")) {
-				// cant just print the line as it shows up in the file
-				// "model name      : QEMU Virtual CPU version 2.5+"
-				// needs to extract the model name and print something better looking
-				// "Model Name: <MODEL_NAME>"
-					System.out.println("Model Name: " + i);
+					//e.g Model Name : QEMU Virtual CPU version 2.5+ -> splits at colon ":", gets rid of extra space
+					//[1] selects part -> QEMU Virtual CPU version 2.5+ as index starts at 0
+					System.out.println("Model Name: " + i.split(":")[1].trim());
 					break;
 				}
 			}
