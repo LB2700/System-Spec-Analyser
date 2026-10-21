@@ -1,3 +1,5 @@
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,71 +11,139 @@ import java.util.List;
  * (usually 100 ticks per second). To find the load, read them twice, wait about
  * a second, read them again, and work out busy / (busy + idle) from the DIFFERENCES.
  */
-public class cpuInfo
-{
-    private static final Path CPUINFO = sysFile.path("/proc/cpuinfo");
-    private static final Path STAT = sysFile.path("/proc/stat");
+public class cpuInfo {
+    public static void showCoreCount() {
+		System.out.println("Processors (cores) avaiable: " + Runtime.getRuntime().availableProcessors());
+		
+		try {
+			for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
+				if (i.startsWith("cpu cores")){
+					System.out.println("There are: " + i + " processers (cores)");
+					break;
+				}
+			}
+		} catch (IOException error) {
+			System.out.println(error.getMessage());
+		}
+	}
 
-    /** Number of cores (logical processors) the operating system sees. */
-    public static int getCount()
-    {
-        int count = 0;
-        for (String line : sysFile.lines(CPUINFO))
-            if (line.startsWith("processor"))
-                count++;
-        return count;
-    }
+    public static void showCpuArch() {
+		//Gets archeitecture, not what the requirements wants, even then it's something cool to add
+		System.out.println("You have: " + System.getProperty("os.arch") + " Cpu archeitecture");
+	}
 
-    /**
-     * The processor model, for example "Intel(R) Xeon(R) Processor @ 2.80GHz".
-     * On arm64 there is no model name line, so this returns "unknown"; use
-     * getField("CPU part") or getField("CPU implementer") instead.
-     */
-    public static String getModel()
-    {
-        String model = getField("model name");
-        return model.isEmpty() ? "unknown" : model;
-    }
+    public static void showCpuModelName() {
+		try {
+			for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
+				if (i.startsWith("model name")) {
+					//e.g Model Name : QEMU Virtual CPU version 2.5+ -> splits at colon ":", gets rid of extra space
+					//[1] selects part -> QEMU Virtual CPU version 2.5+ as index starts at 0
+					System.out.println("Model Name: " + i.split(":")[1].trim());
+					break;
+				}
+			}
+		} catch (java.io.IOException error) {
+			System.out.println(error.getMessage());
+		}
+	}
 
-    /** The value of the first line in /proc/cpuinfo whose name is exactly 'name', or "". */
-    public static String getField(String name)
-    {
-        for (String line : sysFile.lines(CPUINFO)) {
-            int colon = line.indexOf(':');
-            if (colon > 0 && line.substring(0, colon).strip().equals(name))
-                return line.substring(colon + 1).strip();
+    public static long[] getCpuTimes(String coreInfo){
+		//Gets rid of empty space and splits into array
+		String[] arrayOfStrings = coreInfo.trim().split("\\s+");
+	
+		long idle = 0;
+		long busy = 0;
+
+		//e.g cpu 79242 0 74306 842486413 756859 6140 67701 0 ->  index 4 in array is idle (842486413) index 5 is waiting for I/O to complete (756859)
+		final int IDLE_TIME_INDEX = 4;
+		final int IO_TIME_INDEX = 5;
+		
+		//turn each value into long and add the values together, exclude "cpu" -which is at index 0 hence i = 1 
+		//And exclude "idle" and "IO" to find busy time
+		for (int i = 1; i < arrayOfStrings.length; i++) {
+			//System.out.printf("%d: %s \n",i, arrayOfStrings[i]);
+			if (i != IDLE_TIME_INDEX & i != IO_TIME_INDEX){
+    	    	busy += Long.parseLong(arrayOfStrings[i]);
+			} else { 
+				idle += Long.parseLong(arrayOfStrings[i]);
+			}
+		}
+		//System.out.println("");
+		//System.out.printf("busy: %d | idle: %d \n", busy, idle);
+		long[] busyidle = {busy, idle};
+
+		return busyidle;
+	}
+
+    public static void showCpuUsage() {
+		//https://support.checkpoint.com/results/sk/sk65143 - please read
+		
+		ArrayList<Double> idleR1 = new ArrayList<Double>();
+		ArrayList<Double> busyR1 = new ArrayList<Double>();
+		ArrayList<Double> idleR2 = new ArrayList<Double>();
+		ArrayList<Double> busyR2 = new ArrayList<Double>();
+
+		ArrayList<Double> busyDifference = new ArrayList<Double>();
+		ArrayList<Double> idleDifference = new ArrayList<Double>();
+		ArrayList<Double> loadRatio = new ArrayList<Double>();
+
+		try {
+			int numOfCores = Runtime.getRuntime().availableProcessors();
+
+			List<String> coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
+			for (int i = 0; i < (numOfCores + 1); i++){
+
+				String coreInfo = coreInfoLines.get(i);
+				getLoad(idleR1, busyR1, coreInfo);
+			}
+			
+			Thread.sleep(1000);
+	
+			coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
+			for (int i = 0; i < (numOfCores + 1); i++){
+
+				String coreInfo = coreInfoLines.get(i);
+				getLoad(idleR2, busyR2, coreInfo);
+				
+			}
+			
+			for (int i = 0; i < idleR1.size(); i++) {
+			
+				busyDifference.add(busyR2.get(i) - busyR1.get(i));
+				idleDifference.add(idleR2.get(i) - idleR1.get(i));
+				//get precentage time busy -> busy divided by total time, times 100
+				double load = 100.0 * busyDifference.get(i) / (busyDifference.get(i) + idleDifference.get(i));
+				loadRatio.add(load);
+			}
+
+			double totalLoad = 0;
+		
+			for (int i = 1; i < loadRatio.size(); i++) {
+				System.out.println("Cpu: " + i + "has a load of " + loadRatio.get(i) + "%");
+				totalLoad += loadRatio.get(i);
+			}
+
+			double averageLoad = totalLoad / numOfCores;
+			System.out.println("Average Cpu load: " + averageLoad + "%");
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+    public static void getLoad(ArrayList<Double> idleR, ArrayList<Double> busyR, String coreInfo) {
+		long[] busyidle = getCpuTimes(coreInfo);
+		busyR.add((double)busyidle[0]);
+		idleR.add((double)busyidle[1]);
+	}
+
+    public static void showCpuTemperature() {
+	    //https://askubuntu.com/questions/617368/temperatures-files-location
+	    try{
+    	    String temp = Files.readString(Path.of("/sys/class/thermal/thermal_zone0/temp"));
+		    //to get degrees divide by 1000
+		    System.out.println("Cpu temperature: " + Double.parseDouble(temp.trim()) / 1000 + " degrees celcius");
+	    } catch (Exception e) {
+		    System.out.println(e.getMessage());
         }
-        return "";
-    }
-
-    /** Ticks since boot that core number 'core' (0, 1, 2 ...) has spent doing work. */
-    public static long getBusy(int core)
-    {
-        long[] f = fields(core);
-        // user + nice + system + irq + softirq + steal
-        return f == null ? -1 : f[0] + f[1] + f[2] + f[5] + f[6] + f[7];
-    }
-
-    /** Ticks since boot that core number 'core' has spent idle (including waiting for I/O). */
-    public static long getIdle(int core)
-    {
-        long[] f = fields(core);
-        return f == null ? -1 : f[3] + f[4];
-    }
-
-    /** The numbers from the "cpuN" line of /proc/stat, or null if there is no such core. */
-    private static long[] fields(int core)
-    {
-        String prefix = "cpu" + core + " ";
-        for (String line : sysFile.lines(STAT)) {
-            if (line.startsWith(prefix)) {
-                String[] part = line.strip().split("\\s+");
-                long[] f = new long[8];
-                for (int i = 0; i < 8; i++)
-                    f[i] = (i + 1 < part.length) ? Long.parseLong(part[i + 1]) : 0;
-                return f;
-            }
-        }
-        return null;
     }
 }
