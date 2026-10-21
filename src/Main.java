@@ -38,6 +38,7 @@ public class Main {
 		// showCpuArch();
 		// showCpuModelName();
 		// showCpuUsage();
+		// showCpuTemperature();
 	
 
 		Scanner userInput = new Scanner(System.in);
@@ -69,19 +70,37 @@ public class Main {
 			"\t 4. Back\n\n", 4
 		);
 
+		Menu cpuMenu = new Menu(
+			"Options:\n" +
+			"\t 1. Get number of cores\n" + 
+			"\t 2. Show cpu archeitecture \n" +
+			"\t 3. Show cpu model\n" +
+			"\t 4. Core loads\n" +
+			"\t 5. Cpu temperature\n" +
+			"\t 6. Back\n\n", 6
+		);
+
 		pciMenu.setOption(4, () -> {mainMenu.start(userInput);});
 
 		memoryMenu.setOption(1, () -> {memInfo.PrintTotalMemory();});
 		memoryMenu.setOption(2, () -> {memInfo.PrintTotalUsedMemory();});
 		memoryMenu.setOption(3, () -> {memInfo.PrintPercentageOfMemoryUsed();});
 		memoryMenu.setOption(4, () -> {mainMenu.start(userInput);});
+
+		cpuMenu.setOption(1, () -> {showCoreCount();});
+		cpuMenu.setOption(2, () -> {showCpuArch();});
+		cpuMenu.setOption(3, () -> {showCpuModelName();});
+		cpuMenu.setOption(4, () -> {showCpuUsage();});
+		cpuMenu.setOption(5, () -> {showCpuTemperature();});
+		cpuMenu.setOption(6, () -> {mainMenu.start(userInput);});
 		
+		mainMenu.setOption(1, () -> {cpuMenu.start(userInput);});
 		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); // connects the number 2 option to actually running a function
 		mainMenu.setOption(3, () -> {usbDevices();});
 		mainMenu.setOption(4, () -> {pciMenu.start(userInput);}); // connects the number 4 option to actually running a function
 		mainMenu.start(userInput);
 	}
-
+	//Cpu Requirement 1
 	public static long[] getCpuTimes(String coreInfo){
 		//Gets rid of empty space and splits into array
 		String[] arrayOfStrings = coreInfo.trim().split("\\s+");
@@ -89,17 +108,22 @@ public class Main {
 		long idle = 0;
 		long busy = 0;
 
-		//e.g cpu 79242 0 74306 842486413 756859 6140 67701 0 ->  index 4 in array is idle (842486413)
+		//e.g cpu 79242 0 74306 842486413 756859 6140 67701 0 ->  index 4 in array is idle (842486413) index 5 is waiting for I/O to complete (756859)
 		final int IDLE_TIME_INDEX = 4;
+		final int IO_TIME_INDEX = 5;
 		
-		//turn each value into long and add the values together, exclude "cpu" -> i = 1 and exclude "idle" to find busy count
+		//turn each value into long and add the values together, exclude "cpu" -which is at index 0 hence i = 1 
+		//And exclude "idle" and "IO" to find busy time
 		for (int i = 1; i < arrayOfStrings.length; i++) {
-			if (i != IDLE_TIME_INDEX){
+			//System.out.printf("%d: %s \n",i, arrayOfStrings[i]);
+			if (i != IDLE_TIME_INDEX & i != IO_TIME_INDEX){
     	    	busy += Long.parseLong(arrayOfStrings[i]);
 			} else { 
-				idle = Long.parseLong(arrayOfStrings[IDLE_TIME_INDEX]);
+				idle += Long.parseLong(arrayOfStrings[i]);
 			}
 		}
+		//System.out.println("");
+		//System.out.printf("busy: %d | idle: %d \n", busy, idle);
 		long[] busyidle = {busy, idle};
 
 		return busyidle;
@@ -305,11 +329,9 @@ public class Main {
 		try {
 			for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
 				if (i.startsWith("model name")) {
-				// cant just print the line as it shows up in the file
-				// "model name      : QEMU Virtual CPU version 2.5+"
-				// needs to extract the model name and print something better looking
-				// "Model Name: <MODEL_NAME>"
-					System.out.println(i);
+					//e.g Model Name : QEMU Virtual CPU version 2.5+ -> splits at colon ":", gets rid of extra space
+					//[1] selects part -> QEMU Virtual CPU version 2.5+ as index starts at 0
+					System.out.println("Model Name: " + i.split(":")[1].trim());
 					break;
 				}
 			}
@@ -319,76 +341,79 @@ public class Main {
 	}
 
 	public static void showCpuUsage() {
-		//https://support.checkpoint.com/results/sk/sk65143
-		int numOfCores = Runtime.getRuntime().availableProcessors();
-	
-		ArrayList<Double> coreLoads = new ArrayList<Double>();
+		//https://support.checkpoint.com/results/sk/sk65143 - please read
+		
 		ArrayList<Double> idleR1 = new ArrayList<Double>();
 		ArrayList<Double> busyR1 = new ArrayList<Double>();
 		ArrayList<Double> idleR2 = new ArrayList<Double>();
 		ArrayList<Double> busyR2 = new ArrayList<Double>();
 
-		try {
-			List<String> coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
-			for (int i = 0; i < (numOfCores + 1); i++){
-				
-				String coreInfo = coreInfoLines.get(i);
-				System.out.println(coreInfo);
-				
-				long[] firstRead = getCpuTimes(coreInfo);
-				double busy1 = (double)firstRead[0];
-				double idle1 = (double)firstRead[1];
-
-				busyR1.add(busy1);
-				idleR1.add(idle1);
-			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		
-		try {
-			Thread.sleep(1000);
-		} catch (Exception e){
-			System.out.println(e.getMessage());
-		}
-
-		try {
-			List<String> coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
-			for (int i = 0; i < (numOfCores + 1); i++){
-				
-				String coreInfo = coreInfoLines.get(i);
-				long[] secondRead = getCpuTimes(coreInfo);
-				double busy2 = (double)secondRead[0];
-				double idle2 = (double)secondRead[1];
-
-				busyR2.add(busy2);
-				idleR2.add(idle2);
-			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-
 		ArrayList<Double> busyDifference = new ArrayList<Double>();
 		ArrayList<Double> idleDifference = new ArrayList<Double>();
 		ArrayList<Double> loadRatio = new ArrayList<Double>();
 
-		for (int i = 0; i < idleR1.size(); i++) {
+		try {
+			int numOfCores = Runtime.getRuntime().availableProcessors();
+
+			List<String> coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
+			for (int i = 0; i < (numOfCores + 1); i++){
+
+				String coreInfo = coreInfoLines.get(i);
+				getLoad(idleR1, busyR1, coreInfo);
+			}
 			
-			busyDifference.add(busyR2.get(i) - busyR1.get(i));
-			idleDifference.add(idleR2.get(i) - idleR1.get(i));
+			Thread.sleep(1000);
+	
+			coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
+			for (int i = 0; i < (numOfCores + 1); i++){
 
-			double load = 100.0 * busyDifference.get(i) / (busyDifference.get(i) + idleDifference.get(i));
-			loadRatio.add(load);
-		}
+				String coreInfo = coreInfoLines.get(i);
+				getLoad(idleR2, busyR2, coreInfo);
+				
+			}
+			System.out.println(idleR1);
+			System.out.println(idleR2);
+			System.out.println(busyR1);
+			System.out.println(busyR2);
+			for (int i = 0; i < idleR1.size(); i++) {
+			
+				busyDifference.add(busyR2.get(i) - busyR1.get(i));
+				idleDifference.add(idleR2.get(i) - idleR1.get(i));
 
-		double totalLoad = 0;
+				System.out.printf("idle1: %f | idle2: %f \n", idleR1.get(i), idleR2.get(i));
+				System.out.println(busyDifference.get(i));
+				System.out.println(idleDifference.get(i));
+				double load = 100.0 * busyDifference.get(i) / (busyDifference.get(i) + idleDifference.get(i));
+				loadRatio.add(load);
+			}
+
+			double totalLoad = 0;
 		
-		for (int i = 1; i < loadRatio.size(); i++) {
-			System.out.println("Cpu: " + i + "has a load of " + loadRatio.get(i) + "%");
-			totalLoad += loadRatio.get(i);
-		}
+			for (int i = 1; i < loadRatio.size(); i++) {
+				System.out.println("Cpu: " + i + "has a load of " + loadRatio.get(i) + "%");
+				totalLoad += loadRatio.get(i);
+			}
 
-		double averageLoad = totalLoad / numOfCores;
-		System.out.println("Average Cpu load: " + averageLoad + "%");
+			double averageLoad = totalLoad / numOfCores;
+			System.out.println("Average Cpu load: " + averageLoad + "%");
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
+
+	public static void getLoad(ArrayList<Double> idleR, ArrayList<Double> busyR, String coreInfo) {
+		long[] busyidle = getCpuTimes(coreInfo);
+		busyR.add((double)busyidle[0]);
+		idleR.add((double)busyidle[1]);
+	}
+	public static void showCpuTemperature() {
+	//https://askubuntu.com/questions/617368/temperatures-files-location
+	try{
+    	String temp = Files.readString(Path.of("/sys/class/thermal/thermal_zone0/temp"));
+		//to get degrees divide by 1000
+		System.out.println("Cpu temperature: " + Double.parseDouble(temp.trim()) / 1000 + " degrees celcius");
+	} catch (Exception e) {
+		System.out.println(e.getMessage());
+	}
+	}	
 }
