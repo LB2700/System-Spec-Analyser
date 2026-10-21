@@ -111,12 +111,15 @@ public class Main {
 		//turn each value into long and add the values together, exclude "cpu" -which is at index 0 hence i = 1 
 		//And exclude "idle" and "IO" to find busy time
 		for (int i = 1; i < arrayOfStrings.length; i++) {
-			if (i != IDLE_TIME_INDEX | i != IO_TIME_INDEX){
+			//System.out.printf("%d: %s \n",i, arrayOfStrings[i]);
+			if (i != IDLE_TIME_INDEX & i != IO_TIME_INDEX){
     	    	busy += Long.parseLong(arrayOfStrings[i]);
 			} else { 
-				idle = Long.parseLong(arrayOfStrings[IDLE_TIME_INDEX]);
+				idle += Long.parseLong(arrayOfStrings[i]);
 			}
 		}
+		//System.out.println("");
+		//System.out.printf("busy: %d | idle: %d \n", busy, idle);
 		long[] busyidle = {busy, idle};
 
 		return busyidle;
@@ -323,6 +326,9 @@ public class Main {
 				busyDifference.add(busyR2.get(i) - busyR1.get(i));
 				idleDifference.add(idleR2.get(i) - idleR1.get(i));
 
+				System.out.printf("idle1: %f | idle2: %f \n", idleR1.get(i), idleR2.get(i));
+				System.out.println(busyDifference.get(i));
+				System.out.println(idleDifference.get(i));
 				double load = 100.0 * busyDifference.get(i) / (busyDifference.get(i) + idleDifference.get(i));
 				loadRatio.add(load);
 			}
