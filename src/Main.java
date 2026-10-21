@@ -302,7 +302,7 @@ public class Main {
 			for (int i = 0; i < (numOfCores + 1); i++){
 
 				String coreInfo = coreInfoLines.get(i);
-				getLoad(idleR1,busyR1, coreInfo);
+				getLoad(idleR1, busyR1, coreInfo);
 			}
 			
 			Thread.sleep(1000);
@@ -311,9 +311,13 @@ public class Main {
 			for (int i = 0; i < (numOfCores + 1); i++){
 
 				String coreInfo = coreInfoLines.get(i);
-				getLoad(idleR2,busyR2, coreInfo);
+				getLoad(idleR2, busyR2, coreInfo);
+				
 			}
-
+			System.out.println(idleR1);
+			System.out.println(idleR2);
+			System.out.println(busyR1);
+			System.out.println(busyR2);
 			for (int i = 0; i < idleR1.size(); i++) {
 			
 				busyDifference.add(busyR2.get(i) - busyR1.get(i));
