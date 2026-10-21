@@ -43,4 +43,31 @@ public class memInfo
         }
         return -1;
     }
+
+    public static void PrintTotalMemory()
+    {
+        if(getTotal() == -1) {
+            System.out.println("Error reading total memory");
+            return;
+        }
+        System.out.println("Total memory: " + getTotal() / 1024 + " MB");
+    }
+
+    public static void PrintTotalUsedMemory()
+    {
+        if(getUsed() == -1) {
+            System.out.println("Error reading total used memory");
+            return;
+        }
+        System.out.println("Total used memory: " + getUsed() / 1024 + " MB");
+    }
+
+    public static void PrintPercentageOfMemoryUsed()
+    {
+        if(getUsed() == -1 || getTotal() == -1) {
+            System.out.println("Error reading memory information");
+            return;
+        }
+        System.out.println("Percentage of memory used: " + ((double) getUsed() / getTotal() * 100) + "%");
+    }
 }
