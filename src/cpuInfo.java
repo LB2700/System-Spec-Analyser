@@ -4,13 +4,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Information about the processor, read from /proc/cpuinfo and /proc/stat.
- *
- * The busy and idle values are counts of "ticks" since the machine booted
- * (usually 100 ticks per second). To find the load, read them twice, wait about
- * a second, read them again, and work out busy / (busy + idle) from the DIFFERENCES.
- */
 public class cpuInfo {
     public static void showCoreCount() {
 		System.out.println("Processors (cores) avaiable: " + Runtime.getRuntime().availableProcessors());
@@ -58,7 +51,7 @@ public class cpuInfo {
 		final int IDLE_TIME_INDEX = 4;
 		final int IO_TIME_INDEX = 5;
 		
-		//turn each value into long and add the values together, exclude "cpu" -which is at index 0 hence i = 1 
+		//Add values together, exclude "cpu" which is at index 0 hence i = 1 
 		//And exclude "idle" and "IO" to find busy time
 		for (int i = 1; i < arrayOfStrings.length; i++) {
 			//System.out.printf("%d: %s \n",i, arrayOfStrings[i]);
@@ -68,10 +61,8 @@ public class cpuInfo {
 				idle += Long.parseLong(arrayOfStrings[i]);
 			}
 		}
-		//System.out.println("");
-		//System.out.printf("busy: %d | idle: %d \n", busy, idle);
-		long[] busyidle = {busy, idle};
 
+		long[] busyidle = {busy, idle};
 		return busyidle;
 	}
 
