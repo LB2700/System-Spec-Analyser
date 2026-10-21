@@ -55,8 +55,8 @@ public class Main {
 
 		Menu pciMenu = new Menu(
 			"Options:\n" +
-			"\t 1. List all PCI Devices\n" + 
-			"\t 2. Sort and List all PCI Devices\n" +
+			"\t 1. List PCI Vendors\n" + 
+			"\t 2. List PCI Devices\n" + 
 			"\t 3. PCI device detailed view\n" +
 			"\t 4. Back\n\n", 4
 		);
@@ -69,16 +69,23 @@ public class Main {
 			"\t 4. Back\n\n", 4
 		);
 
+		pciMenu.setOption(1, () -> {pciInfo.listVendors(userInput);});
+		pciMenu.setOption(2, () -> {pciInfo.listDevices(userInput);});
+		pciMenu.setOption(3, () -> {pciInfo.listDevice(userInput);});
 		pciMenu.setOption(4, () -> {mainMenu.start(userInput);});
+		pciMenu.setOnStart(() -> {
+			System.out.printf("Total Unique Vendors: %d \n", pciInfo.getVendorIds().size());
+			System.out.printf("Total Unique Devices: %d \n\n", pciInfo.getDeviceIds().size());	
+		});
 
 		memoryMenu.setOption(1, () -> {memInfo.PrintTotalMemory();});
 		memoryMenu.setOption(2, () -> {memInfo.PrintTotalUsedMemory();});
 		memoryMenu.setOption(3, () -> {memInfo.PrintPercentageOfMemoryUsed();});
 		memoryMenu.setOption(4, () -> {mainMenu.start(userInput);});
 		
-		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); // connects the number 2 option to actually running a function
+		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); 
 		mainMenu.setOption(3, () -> {usbDevices();});
-		mainMenu.setOption(4, () -> {pciMenu.start(userInput);}); // connects the number 4 option to actually running a function
+		mainMenu.setOption(4, () -> {pciMenu.start(userInput);}); 
 		mainMenu.start(userInput);
 	}
 
@@ -105,36 +112,6 @@ public class Main {
 		return busyidle;
 	}
 
-	public static void printPciDevices() {
-		System.out.println("PCI devices: " + pciInfo.getCount());
-    	for (int i = 0; i < pciInfo.getCount(); i++) {
-          	printPciDevice(i);
-   		}
-	}
-
-	public static void printPciDevices(ArrayList<Integer> indexArray) throws Exception {
-		System.out.println("PCI devices: " + pciInfo.getCount());
-		for (int i: indexArray) {
-			if (i >= pciInfo.getCount()) {
-				throw new Exception("indexArray contains indecies larger than the size of deviceInfo.");		
-			}
-			printPciDevice(i);
-		}
-	}
-
-	public static void printPciDevice(Integer i) {
-		int vendor = pciInfo.getVendorId(i);
-		int device = pciInfo.getDeviceId(i);
-		System.out.printf("  %s  %04x:%04x  %s %s%n",
-			pciInfo.getAddress(i),
-			vendor,
-			device,
-			pci.vendorName(vendor),
-			pci.deviceName(vendor, device)
-		);
-	}	
-
-
 	static void printUSBDevices(ArrayList<Integer> index) {
 		System.out.println("USB Devices: " + usbInfo.getCount());
 		for (int i : index) {
@@ -148,82 +125,6 @@ public class Main {
 		System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s%n", usbInfo.getBusNumber(i),
 			                      usbInfo.getDeviceNumber(i), vendor, product,
 			                      usb.vendorName(vendor), usb.deviceName(vendor, product));
-	}
-
-	public static void pciDevices() {
-
-		// Create a set that contains a list of unique vendorIds and deviceIds that show up
-		HashSet<Integer> allPciVendorIds = new HashSet<Integer>();
-		HashSet<Integer> allPciDeviceIds = new HashSet<Integer>();
-	
-		try {		
-			for (int i = 0; i < pciInfo.getCount(); i++) {
-				allPciVendorIds.add(pciInfo.getVendorId(i));
-				allPciDeviceIds.add(pciInfo.getDeviceId(i));
-			}			
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-
-		// for (Integer deviceId : allPciDeviceIds) {
-		// 	System.out.printf("%04x\n",deviceId);
-		// }
-		
-		System.out.printf("Total Unique Vendors: %d \n", allPciVendorIds.size());
-		System.out.printf("Total Unique Devices: %d \n\n", allPciDeviceIds.size());	
-
-		// Group PCI devices by vendor
-		for (Integer vendorId : allPciVendorIds) {
-
-			int deviceCount = 0;
-			for (int i = 0; i < pciInfo.getCount(); i++) {
-				if (pciInfo.getVendorId(i) == vendorId) {
-					deviceCount++;
-				}
-			}
-		
-			System.out.printf("%d %s from %s (%04x) \n", 
-				deviceCount, 
-				(deviceCount == 1) ? "Device" : "Devices",
-				pci.vendorName(vendorId),vendorId);
-			for (int count = 0, i = 0; i < pciInfo.getCount(); i++) {
-				if (pciInfo.getVendorId(i) == vendorId) {
-					count++;
-					System.out.printf("\t %d. ", count);
-					printPciDevice(i);
-				}
-			}
-			System.out.print("\n");
-		}
-	}
-
-	public static void listPciDevices(Comparator<Integer> sortingFunction) {
-		ArrayList<Integer> sorted = new ArrayList<>();		
-
-		try {
-			
-	        if (pciInfo.getCount() == 0) {
-	        	System.out.println("\t No PCI devices have been found");
-	        }
-	        else {
-
-	            // populate arrays with indecies that point to PCI devices
-	            for (int i = 0; i < pciInfo.getCount(); i++) {
-					sorted.add(i);
-	       		}
-				
-	       		// sort arrays
-	       		//sortedByName.sort((a, b) -> {return pciInfo.getVendorId(a) - pciInfo.getVendorId(b);});	       	
-	       		//sortedByBus.sort((a, b) -> {return pciInfo.getBus(a) - pciInfo.getBus(b);});
-				sorted.sort(sortingFunction);
-
-				// unsorted version stays printed for now
-	       		printPciDevices(sorted);
-			}
-		} catch (Exception error) {
-			System.out.println(error.getMessage());
-			error.printStackTrace();
-		}
 	}
 
 	public static void usbDevices() {
