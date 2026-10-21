@@ -83,6 +83,13 @@ public class Main {
 		memoryMenu.setOption(2, () -> {memInfo.PrintTotalUsedMemory();});
 		memoryMenu.setOption(3, () -> {memInfo.PrintPercentageOfMemoryUsed();});
 		memoryMenu.setOption(4, () -> {mainMenu.start(userInput);});
+
+		cpuMenu.setOption(1, () -> {showCoreCount();});
+		cpuMenu.setOption(2, () -> {showCpuArch();});
+		cpuMenu.setOption(3, () -> {showCpuModelName();});
+		cpuMenu.setOption(4, () -> {showCpuUsage();});
+		cpuMenu.setOption(5, () -> {showCpuTemperature();});
+		cpuMenu.setOption(6, () -> {mainMenu.start(userInput);});
 		
 		mainMenu.setOption(1, () -> {cpuMenu.start(userInput);});
 		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); // connects the number 2 option to actually running a function
