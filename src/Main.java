@@ -14,13 +14,16 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		try {
-			usb = idLookup.usb();
-		} catch (Exception e) {
-			System.out.println("Error finding USB lookup table");
-		}
-		// usbDevices();
+		ArrayList<Integer> usbByName = new ArrayList<>();
+		ArrayList<Integer> usbByBus = new ArrayList<>();
 
+		try {
+			usb = idLookup.usb();				
+		} catch (Exception error) {
+			System.out.println(error.getMessage());
+			error.printStackTrace();
+		}
+		usbDevices();
 
 		try {
 			pci = idLookup.pci();
@@ -74,6 +77,7 @@ public class Main {
 		memoryMenu.setOption(4, () -> {mainMenu.start(userInput);});
 		
 		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); // connects the number 2 option to actually running a function
+		mainMenu.setOption(3, () -> {usbDevices();});
 		mainMenu.setOption(4, () -> {pciMenu.start(userInput);}); // connects the number 4 option to actually running a function
 		mainMenu.start(userInput);
 	}
@@ -128,6 +132,22 @@ public class Main {
 			pci.vendorName(vendor),
 			pci.deviceName(vendor, device)
 		);
+	}	
+
+
+	static void printUSBDevices(ArrayList<Integer> index) {
+		System.out.println("USB Devices: " + usbInfo.getCount());
+		for (int i : index) {
+			printUSBDevices(i);
+		}
+	}
+
+	static void printUSBDevices(int i) {
+		int vendor = usbInfo.getVendorId(i);
+		int product = usbInfo.getProductId(i);
+		System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s%n", usbInfo.getBusNumber(i),
+			                      usbInfo.getDeviceNumber(i), vendor, product,
+			                      usb.vendorName(vendor), usb.deviceName(vendor, product));
 	}
 
 	public static void pciDevices() {
@@ -207,21 +227,55 @@ public class Main {
 	}
 
 	public static void usbDevices() {
-		try {			
-			System.out.println("USB devices: " + usbInfo.getCount());
+		// try {			
+		// 	System.out.println("USB devices: " + usbInfo.getCount());
+		// 	if (usbInfo.getCount() == 0) {
+		// 	    System.out.println("  No USB devices have been found");
+		// 	}
+		// 	else {
+		// 	    for (int i = 0; i < usbInfo.getCount(); i++) {
+		// 	    int vendor = usbInfo.getVendorId(i);
+		// 	    int product = usbInfo.getProductId(i);
+		// 	    System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s%n", usbInfo.getBusNumber(i),
+		// 	                      usbInfo.getDeviceNumber(i), vendor, product,
+		// 	                      usb.vendorName(vendor), usb.deviceName(vendor, product));           
+		// 	    }
+		// 	}
+		// } catch (Exception error) {
+		// 	System.out.println(error.getMessage());
+		// 	error.printStackTrace();
+		// }
+		ArrayList<Integer> usbByName = new ArrayList<>();
+		ArrayList<Integer> usbByBus = new ArrayList<>();
+		
+		try {
 			if (usbInfo.getCount() == 0) {
-			    System.out.println("  No USB devices have been found");
+				System.out.println("USB Devices: " + usbInfo.getCount());
+				System.out.println("  No USB devices have been found");
 			}
 			else {
-			    for (int i = 0; i < usbInfo.getCount(); i++) {
-			    int vendor = usbInfo.getVendorId(i);
-			    int product = usbInfo.getProductId(i);
-			    System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s%n", usbInfo.getBusNumber(i),
-			                      usbInfo.getDeviceNumber(i), vendor, product,
-			                      usb.vendorName(vendor), usb.deviceName(vendor, product));           
-			    }
+				for (int i = 0; i < usbInfo.getCount(); i++) {
+					usbByName.add(i);
+					usbByBus.add(i);
+				}				
+
+				usbByName.sort((a, b) -> 
+				{
+					return usbInfo.getVendorId(a) - usbInfo.getVendorId(b);
+				});
+				usbByBus.sort((a, b) -> 
+				{
+					return usbInfo.getBusNumber(a) - usbInfo.getBusNumber(b);
+				});
+
+				printUSBDevices(usbByBus);
+				printUSBDevices(usbByName);
+				
 			}
-		} catch (Exception error) {
+		// } catch (IOException error) {
+		// 	System.out.println(error.getMessage());
+		// 	error.printStackTrace();
+	 	} catch (Exception error) {
 			System.out.println(error.getMessage());
 			error.printStackTrace();
 		}
