@@ -97,6 +97,10 @@ public class Main {
 		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); 
 		mainMenu.setOption(3, () -> {usbDevices();});
 		mainMenu.setOption(4, () -> {pciMenu.start(userInput);}); 
+		mainMenu.setOption(5, () -> {
+			System.out.print("Thank you for using System Spec Analyser\n");
+			System.exit(0);
+		});
 
 		while (true) {
 			mainMenu.start(userInput);
@@ -105,11 +109,8 @@ public class Main {
 			userInput.nextLine();
 			userInput.nextLine();
 			
-			System.out.print(Menu.lineSeperator);
-			
-			
-			
-}
+			System.out.print(Menu.lineSeperator);			
+		}
 	}
 
 
