@@ -3,6 +3,8 @@ import java.util.Scanner;
 
 public class Menu {
 
+	public static String lineSeperator = "-".repeat(32) + "\n";
+
 	private String message;
 	private String invalidInputMessage;
 	private String inputPromptMessage;
@@ -60,7 +62,9 @@ public class Menu {
 				run the function linked to the selected option index. Not garunteed to be set. If 
 				an unset function is chosen by the user then the program will crash. 
 				 */
-				System.out.print("-------------------------------------------------\n");
+
+								System.out.print(Menu.lineSeperator);
+
 				menuOptions.get(selectedOption-1).run();
 			} else {
 				System.out.print(invalidInputMessage);

@@ -143,7 +143,7 @@ public class pciInfo
 		}
 
 
-		// enforce a valid vendor id as input, or return if empty string is inputted
+		// enforce a valid vendor id as input, or return if empty string is entered
 		Integer selectedVendorId;
 	
 		scanner.nextLine();
@@ -205,7 +205,7 @@ public class pciInfo
     	System.out.print("\t 3. Bus \n");
     	System.out.print("\t 4. None \n");
 
-		// enforce a valid vendor id as input, or return if empty string is inputted
+		// enforce a valid integer as input, or return if empty string is entered
 		Integer selectedSortingCriteria;
 	
 		scanner.nextLine();

@@ -23,7 +23,7 @@ public class Main {
 			System.out.println(error.getMessage());
 			error.printStackTrace();
 		}
-		usbDevices();
+		//usbDevices();
 
 		try {
 			pci = idLookup.pci();
@@ -46,12 +46,20 @@ public class Main {
 		Menu mainMenu = new Menu(
 			"Welcome to System Spec Analyser\n\n" + 
 			"Options:\n" +
-			"\t1. Processor\n" +
-			"\t2. Memory\n" + 
-			"\t3. USB Devices\n" +
-			"\t4. PCI Devices\n" +
-			"\t5. Quit\n\n", 5
+			"\t 1. Processor\n" +
+			"\t 2. Memory\n" + 
+			"\t 3. USB Devices\n" +
+			"\t 4. PCI Devices\n" +
+			"\t 5. Quit\n\n", 5
 		);
+
+		// Menu cpuMenu = new Menu(
+		// 	"Options:\n" +
+		// 	"\t 1. List PCI Vendors\n" + 
+		// 	"\t 2. List PCI Devices\n" + 
+		// 	"\t 3. PCI device detailed view\n" +
+		// 	"\t 4. Back\n\n", 4
+		// );
 
 		Menu pciMenu = new Menu(
 			"Options:\n" +
@@ -69,6 +77,8 @@ public class Main {
 			"\t 4. Back\n\n", 4
 		);
 
+
+
 		pciMenu.setOption(1, () -> {pciInfo.listVendors(userInput);});
 		pciMenu.setOption(2, () -> {pciInfo.listDevices(userInput);});
 		pciMenu.setOption(3, () -> {pciInfo.listDevice(userInput);});
@@ -82,35 +92,27 @@ public class Main {
 		memoryMenu.setOption(2, () -> {memInfo.PrintTotalUsedMemory();});
 		memoryMenu.setOption(3, () -> {memInfo.PrintPercentageOfMemoryUsed();});
 		memoryMenu.setOption(4, () -> {mainMenu.start(userInput);});
-		
+
+		mainMenu.setOption(1, () -> {cpuInfo.start();});
 		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); 
 		mainMenu.setOption(3, () -> {usbDevices();});
 		mainMenu.setOption(4, () -> {pciMenu.start(userInput);}); 
-		mainMenu.start(userInput);
+
+		while (true) {
+			mainMenu.start(userInput);
+
+			System.out.print("\nPress enter to continue...\n");
+			userInput.nextLine();
+			userInput.nextLine();
+			
+			System.out.print(Menu.lineSeperator);
+			
+			
+			
+}
 	}
 
-	public static long[] getCpuTimes(String coreInfo){
-		//Gets rid of empty space and splits into array
-		String[] arrayOfStrings = coreInfo.trim().split("\\s+");
-	
-		long idle = 0;
-		long busy = 0;
 
-		//e.g cpu 79242 0 74306 842486413 756859 6140 67701 0 ->  index 4 in array is idle (842486413)
-		final int IDLE_TIME_INDEX = 4;
-		
-		//turn each value into long and add the values together, exclude "cpu" -> i = 1 and exclude "idle" to find busy count
-		for (int i = 1; i < arrayOfStrings.length; i++) {
-			if (i != IDLE_TIME_INDEX){
-    	    	busy += Long.parseLong(arrayOfStrings[i]);
-			} else { 
-				idle = Long.parseLong(arrayOfStrings[IDLE_TIME_INDEX]);
-			}
-		}
-		long[] busyidle = {busy, idle};
-
-		return busyidle;
-	}
 
 	static void printUSBDevices(ArrayList<Integer> index) {
 		System.out.println("USB Devices: " + usbInfo.getCount());
@@ -197,99 +199,5 @@ public class Main {
 		}
 	}
 
-	public static void showCpuArch() {
-		//Gets archeitecture, not what the requirements wants, even then it's something cool to add
-		System.out.println("You have: " + System.getProperty("os.arch"));
+
 	}
-
-	public static void showCpuModelName() {
-		try {
-			for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
-				if (i.startsWith("model name")) {
-				// cant just print the line as it shows up in the file
-				// "model name      : QEMU Virtual CPU version 2.5+"
-				// needs to extract the model name and print something better looking
-				// "Model Name: <MODEL_NAME>"
-					System.out.println(i);
-					break;
-				}
-			}
-		} catch (java.io.IOException error) {
-			System.out.println(error.getMessage());
-		}
-	}
-
-	public static void showCpuUsage() {
-		//https://support.checkpoint.com/results/sk/sk65143
-		int numOfCores = Runtime.getRuntime().availableProcessors();
-	
-		ArrayList<Double> coreLoads = new ArrayList<Double>();
-		ArrayList<Double> idleR1 = new ArrayList<Double>();
-		ArrayList<Double> busyR1 = new ArrayList<Double>();
-		ArrayList<Double> idleR2 = new ArrayList<Double>();
-		ArrayList<Double> busyR2 = new ArrayList<Double>();
-
-		try {
-			List<String> coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
-			for (int i = 0; i < (numOfCores + 1); i++){
-				
-				String coreInfo = coreInfoLines.get(i);
-				System.out.println(coreInfo);
-				
-				long[] firstRead = getCpuTimes(coreInfo);
-				double busy1 = (double)firstRead[0];
-				double idle1 = (double)firstRead[1];
-
-				busyR1.add(busy1);
-				idleR1.add(idle1);
-			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		
-		try {
-			Thread.sleep(1000);
-		} catch (Exception e){
-			System.out.println(e.getMessage());
-		}
-
-		try {
-			List<String> coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
-			for (int i = 0; i < (numOfCores + 1); i++){
-				
-				String coreInfo = coreInfoLines.get(i);
-				long[] secondRead = getCpuTimes(coreInfo);
-				double busy2 = (double)secondRead[0];
-				double idle2 = (double)secondRead[1];
-
-				busyR2.add(busy2);
-				idleR2.add(idle2);
-			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-
-		ArrayList<Double> busyDifference = new ArrayList<Double>();
-		ArrayList<Double> idleDifference = new ArrayList<Double>();
-		ArrayList<Double> loadRatio = new ArrayList<Double>();
-
-		for (int i = 0; i < idleR1.size(); i++) {
-			
-			busyDifference.add(busyR2.get(i) - busyR1.get(i));
-			idleDifference.add(idleR2.get(i) - idleR1.get(i));
-
-			double load = 100.0 * busyDifference.get(i) / (busyDifference.get(i) + idleDifference.get(i));
-			loadRatio.add(load);
-		}
-
-		double totalLoad = 0;
-		
-		for (int i = 1; i < loadRatio.size(); i++) {
-			System.out.println("Cpu: " + i + "has a load of " + loadRatio.get(i) + "%");
-			totalLoad += loadRatio.get(i);
-		}
-
-		double averageLoad = totalLoad / numOfCores;
-		System.out.println("Average Cpu load: " + averageLoad + "%");
-	}
-}
