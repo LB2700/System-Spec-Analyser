@@ -130,4 +130,75 @@ public class usbInfo
             return -1;
         }
     }
+
+    public static void printUSBDevices(ArrayList<Integer> index) {
+    	System.out.println("USB Devices: " + usbInfo.getCount());
+    	for (int i : index) {
+    		printUSBDevices(i);
+    	}
+    }
+
+    public static void printUSBDevices(int i) {
+    	int vendor = usbInfo.getVendorId(i);
+    	int product = usbInfo.getProductId(i);
+    	System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s%n", usbInfo.getBusNumber(i),
+    		                      usbInfo.getDeviceNumber(i), vendor, product,
+    		                      Main.usb.vendorName(vendor), Main.usb.deviceName(vendor, product));
+    }
+
+    public static void usbDevices() {
+    	// try {			
+    	// 	System.out.println("USB devices: " + usbInfo.getCount());
+    	// 	if (usbInfo.getCount() == 0) {
+    	// 	    System.out.println("  No USB devices have been found");
+    	// 	}
+    	// 	else {
+    	// 	    for (int i = 0; i < usbInfo.getCount(); i++) {
+    	// 	    int vendor = usbInfo.getVendorId(i);
+    	// 	    int product = usbInfo.getProductId(i);
+    	// 	    System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s%n", usbInfo.getBusNumber(i),
+    	// 	                      usbInfo.getDeviceNumber(i), vendor, product,
+    	// 	                      usb.vendorName(vendor), usb.deviceName(vendor, product));           
+    	// 	    }
+    	// 	}
+    	// } catch (Exception error) {
+    	// 	System.out.println(error.getMessage());
+    	// 	error.printStackTrace();
+    	// }
+    	ArrayList<Integer> usbByName = new ArrayList<>();
+    	ArrayList<Integer> usbByBus = new ArrayList<>();
+    	
+    	try {
+    		if (usbInfo.getCount() == 0) {
+    			System.out.println("USB Devices: " + usbInfo.getCount());
+    			System.out.println("  No USB devices have been found");
+    		}
+    		else {
+    			for (int i = 0; i < usbInfo.getCount(); i++) {
+    				usbByName.add(i);
+    				usbByBus.add(i);
+    			}				
+
+    			usbByName.sort((a, b) -> 
+    			{
+    				return usbInfo.getVendorId(a) - usbInfo.getVendorId(b);
+    			});
+    			usbByBus.sort((a, b) -> 
+    			{
+    				return usbInfo.getBusNumber(a) - usbInfo.getBusNumber(b);
+    			});
+
+    			//printUSBDevices(usbByBus);
+    			printUSBDevices(usbByName);
+    			
+    		}
+    	// } catch (IOException error) {
+    	// 	System.out.println(error.getMessage());
+    	// 	error.printStackTrace();
+     	} catch (Exception error) {
+    		System.out.println(error.getMessage());
+    		error.printStackTrace();
+    	}
+    }
+
 }
