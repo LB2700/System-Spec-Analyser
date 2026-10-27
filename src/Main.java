@@ -77,6 +77,20 @@ public class Main {
 			"\t 4. Back\n\n", 4
 		);
 
+		pciMenu.setOption(4, () -> {mainMenu.start(userInput);});
+		pciMenu.setOnStart(() -> {System.out.println("Hello World");});
+
+		memoryMenu.setOption(1, () -> {memInfo.PrintTotalMemory();});
+		memoryMenu.setOption(2, () -> {memInfo.PrintTotalUsedMemory();});
+		memoryMenu.setOption(3, () -> {memInfo.PrintPercentageOfMemoryUsed();});
+		memoryMenu.setOption(4, () -> {mainMenu.start(userInput);});
+
+		memoryMenu.setOnStart(() -> {System.out.println("Hello World");});
+		
+		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); // connects the number 2 option to actually running a function
+		mainMenu.setOption(4, () -> {pciMenu.start(userInput);}); // connects the number 4 option to actually running a function
+		mainMenu.start(userInput);
+	}
 
 
 		pciMenu.setOption(1, () -> {pciInfo.listVendors(userInput);});
@@ -129,5 +143,15 @@ public class Main {
 		}
 	}
 
-
+	public static void printPciDevice(Integer i) {
+		int vendor = pciInfo.getVendorId(i);
+		int device = pciInfo.getDeviceId(i);
+		System.out.printf("  %s  %04x:%04x  %s %s%n",
+			pciInfo.getAddress(i),
+			vendor,
+			device,
+			pci.vendorName(vendor),
+			pci.deviceName(vendor, device)
+		);
 	}
+}
