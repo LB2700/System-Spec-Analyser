@@ -5,27 +5,27 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
-
+import java.io.File;
 
 public class cpuInfo {
     public static void showCoreCount() {
-		System.out.println("Processors (cores) avaiable: " + Runtime.getRuntime().availableProcessors());
+		System.out.println("There are " + Runtime.getRuntime().availableProcessors() + " processors (cores) avaiable");
 		
-		try {
-			for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
-				if (i.startsWith("cpu cores")){
-					System.out.println("There are: " + i + " processers (cores)");
-					break;
-				}
-			}
-		} catch (IOException error) {
-			System.out.println(error.getMessage());
-		}
+		//try {
+		//	for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
+		//		if (i.startsWith("cpu cores")){
+		//			System.out.println("There are: " + i + " processers (cores)");
+		//			break;
+		//		}
+		//	}
+		//} catch (IOException error) {
+		//	System.out.println(error.getMessage());
+		//}
 	}
 
     public static void showCpuArch() {
-		//Gets archeitecture, not what the requirements wants, even then it's something cool to add
-		System.out.println("You have: " + System.getProperty("os.arch") + " Cpu archeitecture");
+		//Gets archeitecture, not a requirement, it's something cool to add
+		System.out.println("You have " + System.getProperty("os.arch") + " Cpu archeitecture");
 	}
 
     public static void showCpuModelName() {
@@ -34,7 +34,7 @@ public class cpuInfo {
 				if (i.startsWith("model name")) {
 					//e.g Model Name : QEMU Virtual CPU version 2.5+ -> splits at colon ":", gets rid of extra space
 					//[1] selects part -> QEMU Virtual CPU version 2.5+ as index starts at 0
-					System.out.println("Model Name: " + i.split(":")[1].trim());
+					System.out.println("Your model is " + i.split(":")[1].trim());
 					break;
 				}
 			}
@@ -113,16 +113,17 @@ public class cpuInfo {
 			double totalLoad = 0;
 		
 			for (int i = 1; i < loadRatio.size(); i++) {
-				System.out.println("Cpu: " + i + "has a load of " + loadRatio.get(i) + "%");
+				System.out.printf("Cpu: " + i + " has a load of %.2f%%%n", loadRatio.get(i));
 				totalLoad += loadRatio.get(i);
 			}
-
+			System.out.println("-----Average load------")
 			double averageLoad = totalLoad / numOfCores;
-			System.out.println("Average Cpu load: " + averageLoad + "%");
+			System.out.printf("Average Cpu load: %.2f%%%n", averageLoad);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
 	}
+
 
     public static void getLoad(ArrayList<Double> idleR, ArrayList<Double> busyR, String coreInfo) {
 		long[] busyidle = getCpuTimes(coreInfo);
