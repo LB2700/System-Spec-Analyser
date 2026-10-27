@@ -1,12 +1,12 @@
 import pygal
-file = open("cacheResults.csv", "r")
+file = open("cacheResults.csv", "r") # opens the cache results to be read
 
 # dictionary so each stride gets its own list of times
 timesByStride = {}
 setSizes = []
 
 # read the csv file
-header = file.readline()  # skip the header row
+header = file.readline()  # skip the header row since its only used for readability
 
 for line in file:
     content = line.strip()
@@ -43,9 +43,9 @@ chart.y_title = "Time per access (ns)"
 chart.x_labels = list(map(sizeLabel, setSizes))
 chart.x_label_rotation = 45
 
-# one line per stride
+# plot one line per stride
 for stride in timesByStride:
     chart.add(str(stride) + " B stride", timesByStride[stride])
 
-chart.render_to_file("cache_plot.svg")
+chart.render_to_file("cache_plot.svg") # save the file
 print("Graph saved to cache_plot.svg")
