@@ -1,5 +1,7 @@
 import pygal
-file = open("cacheResults.csv", "r") # opens the cache results to be read
+
+fileName = input("Enter the name of the csv file to be converted (DONT ADD .csv TO IT): ")
+file = open("output/csvFiles/" + fileName + ".csv", "r") # opens the cache results to be read
 
 # dictionary so each stride gets its own list of times
 timesByStride = {}
@@ -47,5 +49,6 @@ chart.x_label_rotation = 45
 for stride in timesByStride:
     chart.add(str(stride) + " B stride", timesByStride[stride])
 
-chart.render_to_file("cache_plot.svg") # save the file
+fileOutput = input("enter the name of the Output file: ")
+chart.render_to_file("output/graphs/" + fileOutput + ".svg") # save the file
 print("Graph saved to cache_plot.svg")
