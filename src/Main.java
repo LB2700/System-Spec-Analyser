@@ -1,11 +1,13 @@
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Comparator;
 import java.util.Scanner;
+
 
 public class Main {
 
@@ -64,7 +66,8 @@ public class Main {
 			"\t 1. Total Memory\n" + 
 			"\t 2. Total Used Memory\n" +
 			"\t 3. Percentage of Memory Used\n" +
-			"\t 4. Back\n\n", 4
+			"\t 4. Run cache performance investigation \n" +
+			"\t 5. Back\n\n", 5
 		);
 
 		Menu cpuMenu = new Menu(
@@ -74,20 +77,6 @@ public class Main {
 			//"\t 5. Cpu temperature\n" +
 			"\t 3. Back\n\n", 3
 		);
-		pciMenu.setOption(4, () -> {mainMenu.start(userInput);});
-		pciMenu.setOnStart(() -> {System.out.println("Hello World");});
-
-		memoryMenu.setOption(1, () -> {memInfo.PrintTotalMemory();});
-		memoryMenu.setOption(2, () -> {memInfo.PrintTotalUsedMemory();});
-		memoryMenu.setOption(3, () -> {memInfo.PrintPercentageOfMemoryUsed();});
-		memoryMenu.setOption(4, () -> {mainMenu.start(userInput);});
-
-		memoryMenu.setOnStart(() -> {System.out.println("Hello World");});
-		
-		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); // connects the number 2 option to actually running a function
-		mainMenu.setOption(4, () -> {pciMenu.start(userInput);}); // connects the number 4 option to actually running a function
-		mainMenu.start(userInput);
-
 
 		pciMenu.setOption(1, () -> {pciInfo.listVendors(userInput);});
 		pciMenu.setOption(2, () -> {pciInfo.listDevices(userInput);});
@@ -101,7 +90,14 @@ public class Main {
 		memoryMenu.setOption(1, () -> {memInfo.PrintTotalMemory();});
 		memoryMenu.setOption(2, () -> {memInfo.PrintTotalUsedMemory();});
 		memoryMenu.setOption(3, () -> {memInfo.PrintPercentageOfMemoryUsed();});
-		memoryMenu.setOption(4, () -> {mainMenu.start(userInput);});
+		memoryMenu.setOption(4, () -> {
+			try {
+				memInfo.cachePerformanceAnalysis(userInput);
+			} catch (FileNotFoundException e) {
+				System.out.printf("Error finding output directory. Please ensure ./output/csvFiles already exists \n");
+			}
+		});
+		memoryMenu.setOption(5, () -> {mainMenu.start(userInput);});
 
 		cpuMenu.setOption(1, () -> {cpuInfo.Coreinfo();});
 		cpuMenu.setOption(2, () -> {cpuInfo.showCpuUsage();});
