@@ -20,13 +20,29 @@ public class usbInfo
     private static final Path ROOT = sysFile.path("/sys/bus/usb/devices");
     private static List<Path> devices;
 
+
+    //READ ME
+    // To run the test cases you need to compile the java files through the terminal not a IDE
+    // Comment out the original file location for ROOT
+
+
+    /* Test Case file locations */
+    /* Test Case: No USB devices found */
+    //private static final Path ROOT = sysFile.path("SysProjectTestCases/NoUSBs");
+    /* Test Case: No name found */
+    //private static final Path ROOT = sysFile.path("SysProjectTestCases/FakeUSBs");
+    
     private static List<Path> list()
     {
+        //Debug - Jonathan
+        //System.out.println("File is checking devices");
         if (devices == null) {
             List<Path> found = new ArrayList<>();
+            //Debug - Jonathan
+            //System.out.println("File is checking the ROOT folder");
             if (Files.isDirectory(ROOT)) {
 // 				(Debug - luke)
-// 				System.out.printf("Looking through directory: %s \n", ROOT); 
+//				System.out.printf("Looking through directory: %s \n", ROOT); 
                 try (DirectoryStream<Path> dir = Files.newDirectoryStream(ROOT)) {
                     for (Path p : dir) {
 // 					(Debug - luke)
@@ -37,6 +53,10 @@ public class usbInfo
                 } catch (IOException e) {
                     // leave the list as it is
                 }
+            }
+            else {
+                //Debug - Jonathan
+                System.out.println("File didnt recognise root");
             }
             // lsusb order: by bus number, then device number
             found.sort(Comparator.comparingLong((Path p) -> sysFile.number(p.resolve("busnum")))
@@ -110,4 +130,75 @@ public class usbInfo
             return -1;
         }
     }
+
+    public static void printUSBDevices(ArrayList<Integer> index) {
+    	System.out.println("USB Devices: " + usbInfo.getCount());
+    	for (int i : index) {
+    		printUSBDevices(i);
+    	}
+    }
+
+    public static void printUSBDevices(int i) {
+    	int vendor = usbInfo.getVendorId(i);
+    	int product = usbInfo.getProductId(i);
+    	System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s%n", usbInfo.getBusNumber(i),
+    		                      usbInfo.getDeviceNumber(i), vendor, product,
+    		                      Main.usb.vendorName(vendor), Main.usb.deviceName(vendor, product));
+    }
+
+    public static void usbDevices() {
+    	// try {			
+    	// 	System.out.println("USB devices: " + usbInfo.getCount());
+    	// 	if (usbInfo.getCount() == 0) {
+    	// 	    System.out.println("  No USB devices have been found");
+    	// 	}
+    	// 	else {
+    	// 	    for (int i = 0; i < usbInfo.getCount(); i++) {
+    	// 	    int vendor = usbInfo.getVendorId(i);
+    	// 	    int product = usbInfo.getProductId(i);
+    	// 	    System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s%n", usbInfo.getBusNumber(i),
+    	// 	                      usbInfo.getDeviceNumber(i), vendor, product,
+    	// 	                      usb.vendorName(vendor), usb.deviceName(vendor, product));           
+    	// 	    }
+    	// 	}
+    	// } catch (Exception error) {
+    	// 	System.out.println(error.getMessage());
+    	// 	error.printStackTrace();
+    	// }
+    	ArrayList<Integer> usbByName = new ArrayList<>();
+    	ArrayList<Integer> usbByBus = new ArrayList<>();
+    	
+    	try {
+    		if (usbInfo.getCount() == 0) {
+    			System.out.println("USB Devices: " + usbInfo.getCount());
+    			System.out.println("  No USB devices have been found");
+    		}
+    		else {
+    			for (int i = 0; i < usbInfo.getCount(); i++) {
+    				usbByName.add(i);
+    				usbByBus.add(i);
+    			}				
+
+    			usbByName.sort((a, b) -> 
+    			{
+    				return usbInfo.getVendorId(a) - usbInfo.getVendorId(b);
+    			});
+    			usbByBus.sort((a, b) -> 
+    			{
+    				return usbInfo.getBusNumber(a) - usbInfo.getBusNumber(b);
+    			});
+
+    			//printUSBDevices(usbByBus);
+    			printUSBDevices(usbByName);
+    			
+    		}
+    	// } catch (IOException error) {
+    	// 	System.out.println(error.getMessage());
+    	// 	error.printStackTrace();
+     	} catch (Exception error) {
+    		System.out.println(error.getMessage());
+    		error.printStackTrace();
+    	}
+    }
+
 }
