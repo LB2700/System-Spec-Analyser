@@ -7,6 +7,8 @@ import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import java.util.Scanner;
+
 public class memoryHierarchyExplorer 
 {
     public static void main(String[] args) throws FileNotFoundException
@@ -26,7 +28,10 @@ public class memoryHierarchyExplorer
         // Big enough that the timing is long enough for nanoTime() to measure accurately.
         final long TARGET = 20_000_000L;
 
-        PrintWriter csv = new PrintWriter("cacheResults.csv"); // creates the file
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the Name of the new csv file: ");
+        String fileName = scanner.next();
+        PrintWriter csv = new PrintWriter("output/csvFiles/" + fileName + ".csv"); // creates the file
         csv.println("stride_bytes,set_size_kb,ns_per_access"); // header row, used for readability. it is ignored in the graph plotter file
 
         // this for loop prints the time taken for different strides
@@ -48,7 +53,7 @@ public class memoryHierarchyExplorer
 
                 // Number of passes needed so the total reads come to about TARGET (20 mil)
                 // the 1 is there so if a pass is bigger than TARGET it guarantees at least one pass
-                long passes = Math.max(1, TARGET / perPass);
+                long passes = Math.max(1, TARGET / perPass); // Math.max gets the highest value of both inputs
 
                 // warmup pass, just to make sure the JIT compiler has optimized the code before the measuring starts
                 for (int i = 0; i < setSize; i += stride)
@@ -81,6 +86,7 @@ public class memoryHierarchyExplorer
         }
 
         csv.close(); // saves and closes the file
+        scanner.close();
 
         System.out.println("\n(checksum " + sum + ")"); // stops the JIT removing the loops
 
@@ -90,7 +96,7 @@ public class memoryHierarchyExplorer
             // no need to explain this code...
 
             String L1Size = Files.readString(Paths.get("/sys/devices/system/cpu/cpu0/cache/index0/size")).trim();
-            System.out.println("L1 data cache size: " + L1Size);
+            System.out.println("L1 cache size: " + L1Size);
 
             String L2Size = Files.readString(Paths.get("/sys/devices/system/cpu/cpu0/cache/index2/size")).trim();
             System.out.println("L2 cache size: " + L2Size);
