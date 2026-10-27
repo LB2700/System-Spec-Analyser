@@ -70,4 +70,6 @@ public class memInfo
         }
         System.out.println("Percentage of memory used: " + ((double) getUsed() / getTotal() * 100) + "%");
     }
+
+    
 }
