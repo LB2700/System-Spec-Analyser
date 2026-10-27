@@ -69,12 +69,10 @@ public class Main {
 
 		Menu cpuMenu = new Menu(
 			"Options:\n" +
-			"\t 1. Get number of cores\n" + 
-			"\t 2. Show cpu archeitecture \n" +
-			"\t 3. Show cpu model\n" +
-			"\t 4. Core loads\n" +
-			"\t 5. Cpu temperature\n" +
-			"\t 6. Back\n\n", 6
+			"\t 1. Show Core info\n" + 
+			"\t 2. Get Core load info\n" +
+			//"\t 5. Cpu temperature\n" +
+			"\t 3. Back\n\n", 3
 		);
 		pciMenu.setOption(4, () -> {mainMenu.start(userInput);});
 		pciMenu.setOnStart(() -> {System.out.println("Hello World");});
@@ -89,7 +87,6 @@ public class Main {
 		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); // connects the number 2 option to actually running a function
 		mainMenu.setOption(4, () -> {pciMenu.start(userInput);}); // connects the number 4 option to actually running a function
 		mainMenu.start(userInput);
-	}
 
 
 		pciMenu.setOption(1, () -> {pciInfo.listVendors(userInput);});
@@ -106,12 +103,9 @@ public class Main {
 		memoryMenu.setOption(3, () -> {memInfo.PrintPercentageOfMemoryUsed();});
 		memoryMenu.setOption(4, () -> {mainMenu.start(userInput);});
 
-		cpuMenu.setOption(1, () -> {cpuInfo.showCoreCount();});
-		cpuMenu.setOption(2, () -> {cpuInfo.showCpuArch();});
-		cpuMenu.setOption(3, () -> {cpuInfo.showCpuModelName();});
-		cpuMenu.setOption(4, () -> {cpuInfo.showCpuUsage();});
-		cpuMenu.setOption(5, () -> {cpuInfo.showCpuTemperature();});
-		cpuMenu.setOption(6, () -> {mainMenu.start(userInput);});
+		cpuMenu.setOption(1, () -> {cpuInfo.Coreinfo();});
+		cpuMenu.setOption(2, () -> {cpuInfo.showCpuUsage();});
+		cpuMenu.setOption(3, () -> {mainMenu.start(userInput);});
 		
 		mainMenu.setOption(1, () -> {cpuMenu.start(userInput);});
 		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); 
