@@ -14,9 +14,6 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		ArrayList<Integer> usbByName = new ArrayList<>();
-		ArrayList<Integer> usbByBus = new ArrayList<>();
-
 		try {
 			usb = idLookup.usb();				
 		} catch (Exception error) {
@@ -38,6 +35,7 @@ public class Main {
 		// showCpuArch();
 		// showCpuModelName();
 		// showCpuUsage();
+		// showCpuTemperature();
 	
 
 		Scanner userInput = new Scanner(System.in);
@@ -52,14 +50,6 @@ public class Main {
 			"\t 4. PCI Devices\n" +
 			"\t 5. Quit\n\n", 5
 		);
-
-		// Menu cpuMenu = new Menu(
-		// 	"Options:\n" +
-		// 	"\t 1. List PCI Vendors\n" + 
-		// 	"\t 2. List PCI Devices\n" + 
-		// 	"\t 3. PCI device detailed view\n" +
-		// 	"\t 4. Back\n\n", 4
-		// );
 
 		Menu pciMenu = new Menu(
 			"Options:\n" +
@@ -77,6 +67,15 @@ public class Main {
 			"\t 4. Back\n\n", 4
 		);
 
+		Menu cpuMenu = new Menu(
+			"Options:\n" +
+			"\t 1. Get number of cores\n" + 
+			"\t 2. Show cpu archeitecture \n" +
+			"\t 3. Show cpu model\n" +
+			"\t 4. Core loads\n" +
+			"\t 5. Cpu temperature\n" +
+			"\t 6. Back\n\n", 6
+		);
 		pciMenu.setOption(4, () -> {mainMenu.start(userInput);});
 		pciMenu.setOnStart(() -> {System.out.println("Hello World");});
 
@@ -107,7 +106,14 @@ public class Main {
 		memoryMenu.setOption(3, () -> {memInfo.PrintPercentageOfMemoryUsed();});
 		memoryMenu.setOption(4, () -> {mainMenu.start(userInput);});
 
-		mainMenu.setOption(1, () -> {cpuInfo.start();});
+		cpuMenu.setOption(1, () -> {cpuInfo.showCoreCount();});
+		cpuMenu.setOption(2, () -> {cpuInfo.showCpuArch();});
+		cpuMenu.setOption(3, () -> {cpuInfo.showCpuModelName();});
+		cpuMenu.setOption(4, () -> {cpuInfo.showCpuUsage();});
+		cpuMenu.setOption(5, () -> {cpuInfo.showCpuTemperature();});
+		cpuMenu.setOption(6, () -> {mainMenu.start(userInput);});
+		
+		mainMenu.setOption(1, () -> {cpuMenu.start(userInput);});
 		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); 
 		mainMenu.setOption(3, () -> {usbInfo.usbDevices();});
 		mainMenu.setOption(4, () -> {pciMenu.start(userInput);}); 
