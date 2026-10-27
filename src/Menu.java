@@ -63,9 +63,21 @@ public class Menu {
 				an unset function is chosen by the user then the program will crash. 
 				 */
 
-								System.out.print(Menu.lineSeperator);
+				System.out.print(Menu.lineSeperator);
 
+				// run selected option
 				menuOptions.get(selectedOption-1).run();
+
+				// pause until next input from user
+				System.out.print("\nPress enter to continue...\n");
+				scanner.nextLine();
+				scanner.nextLine();
+
+				System.out.print(Menu.lineSeperator);
+
+				// re-run this menu
+				this.start(scanner);
+				
 			} else {
 				System.out.print(invalidInputMessage);
 				continue;

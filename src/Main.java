@@ -116,15 +116,17 @@ public class Main {
 			System.exit(0);
 		});
 
-		while (true) {
-			mainMenu.start(userInput);
+		mainMenu.start(userInput);
 
-			System.out.print("\nPress enter to continue...\n");
-			userInput.nextLine();
-			userInput.nextLine();
-			
-			System.out.print(Menu.lineSeperator);			
-		}
+// 		while (true) {
+// 			mainMenu.start(userInput);
+// 
+// 			System.out.print("\nPress enter to continue...\n");
+// 			userInput.nextLine();
+// 			userInput.nextLine();
+// 			
+// 			System.out.print(Menu.lineSeperator);			
+// 		}
 	}
 
 
