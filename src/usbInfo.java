@@ -17,22 +17,12 @@ import java.util.List;
  */
 public class usbInfo
 {
-    private static final Path ROOT = sysFile.path("/sys/bus/usb/devices");
+    private static Path OGROOT = sysFile.path("/sys/bus/usb/devices");
+    private static Path ROOT = sysFile.path("/sys/bus/usb/devices");
     private static List<Path> devices;
-
-
-    //READ ME
-    // To run the test cases you need to compile the java files through the terminal not a IDE
-    // Comment out the original file location for ROOT
-
-
-    /* Test Case file locations */
-    /* Test Case: No USB devices found */
-    //private static final Path ROOT = sysFile.path("SysProjectTestCases/NoUSBs");
-    /* Test Case: No name found */
-    //private static final Path ROOT = sysFile.path("SysProjectTestCases/FakeUSBs");
+    protected static idLookup usb;
     
-    private static List<Path> list()
+    protected static List<Path> list(Path inRoot)
     {
         //Debug - Jonathan
         //System.out.println("File is checking devices");
@@ -40,10 +30,10 @@ public class usbInfo
             List<Path> found = new ArrayList<>();
             //Debug - Jonathan
             //System.out.println("File is checking the ROOT folder");
-            if (Files.isDirectory(ROOT)) {
+            if (Files.isDirectory(inRoot)) {
 // 				(Debug - luke)
 //				System.out.printf("Looking through directory: %s \n", ROOT); 
-                try (DirectoryStream<Path> dir = Files.newDirectoryStream(ROOT)) {
+                try (DirectoryStream<Path> dir = Files.newDirectoryStream(inRoot)) {
                     for (Path p : dir) {
 // 					(Debug - luke)
 // 					System.out.printf("\t looking at: %s \n",p); 
@@ -75,13 +65,13 @@ public class usbInfo
     /** How many USB devices there are (0 if the machine has no USB support). */
     public static int getCount()
     {
-        return list().size();
+        return list(ROOT).size();
     }
 
     /** The name Linux gives the device, for example "1-2" or "usb1". */
     public static String getName(int index)
     {
-        return list().get(index).getFileName().toString();
+        return list(ROOT).get(index).getFileName().toString();
     }
 
     /** The vendor ID, for example 0x046d, or -1. The files hold it as plain hex digits. */
@@ -99,31 +89,31 @@ public class usbInfo
     /** The manufacturer text reported by the device itself, or "" if it has none. */
     public static String getManufacturer(int index)
     {
-        return sysFile.text(list().get(index).resolve("manufacturer"));
+        return sysFile.text(list(ROOT).get(index).resolve("manufacturer"));
     }
 
     /** The product text reported by the device itself, or "" if it has none. */
     public static String getProduct(int index)
     {
-        return sysFile.text(list().get(index).resolve("product"));
+        return sysFile.text(list(ROOT).get(index).resolve("product"));
     }
 
     /** The bus number the device is on, or -1. */
     public static int getBusNumber(int index)
     {
-        return (int) sysFile.number(list().get(index).resolve("busnum"));
+        return (int) sysFile.number(list(ROOT).get(index).resolve("busnum"));
     }
 
     /** The device number on its bus, or -1. */
     public static int getDeviceNumber(int index)
     {
-        return (int) sysFile.number(list().get(index).resolve("devnum"));
+        return (int) sysFile.number(list(ROOT).get(index).resolve("devnum"));
     }
 
     // The USB id files hold bare hex such as "1d6b" with no 0x prefix.
     private static int hex(int index, String file)
     {
-        String s = sysFile.text(list().get(index).resolve(file));
+        String s = sysFile.text(list(ROOT).get(index).resolve(file));
         try {
             return Integer.parseInt(s, 16);
         } catch (NumberFormatException e) {
@@ -146,7 +136,7 @@ public class usbInfo
     		                      Main.usb.vendorName(vendor), Main.usb.deviceName(vendor, product));
     }
 
-    public static void usbDevices() {
+    public static void usbDevices(int sortCase) {
     	// try {			
     	// 	System.out.println("USB devices: " + usbInfo.getCount());
     	// 	if (usbInfo.getCount() == 0) {
@@ -188,8 +178,18 @@ public class usbInfo
     				return usbInfo.getBusNumber(a) - usbInfo.getBusNumber(b);
     			});
 
+                switch (sortCase) {
+                    case 1:
+                        printUSBDevices(usbByBus);
+                        break;
+                    case 2:
+                        printUSBDevices(usbByName);
+                    default:
+                        throw new AssertionError();
+                }
+
     			//printUSBDevices(usbByBus);
-    			printUSBDevices(usbByName);
+    			//printUSBDevices(usbByName);
     			
     		}
     	// } catch (IOException error) {
@@ -199,6 +199,22 @@ public class usbInfo
     		System.out.println(error.getMessage());
     		error.printStackTrace();
     	}
+    }
+
+    public static void printSysRoot(int sortCase)
+    {
+        usbInfo.setRoot(OGROOT);
+        usbInfo.usbDevices(sortCase);      // uses the existing getVendorId, getBusNumber, etc.
+    }
+
+    public static void setRoot(Path newRoot)
+    {
+        ROOT = newRoot;
+        rescan();   // forget the devices cached from the old folder
+    }
+
+    public static void listUSBs() {
+        System.out.println("There are " + getCount() + " USB devices in your machine"); 
     }
 
 }
