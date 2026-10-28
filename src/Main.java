@@ -78,6 +78,22 @@ public class Main {
 			"\t 3. Back\n\n", 3
 		);
 
+		Menu usbMenu = new Menu(
+			"Options:\n" +
+			"\t 1. Number of USBs\n" + 
+			"\t 2. List USB devices by name\n" +
+			"\t 3. List USB devices by bus\n" +
+			"\t 4. Test USBs\n" +
+			"\t 5. Back\n\n", 5
+		);
+
+		Menu testUSBMenu = new Menu(
+			"Options:\n" + 
+			"\t 1. No USB scenario\n" + 
+			"\t 2. Unrecognised USB scenario\n" + 
+			"\t 3. Back\n\n", 3
+		);
+
 		pciMenu.setOption(1, () -> {pciInfo.listVendors(userInput);});
 		pciMenu.setOption(2, () -> {pciInfo.listDevices(userInput);});
 		pciMenu.setOption(3, () -> {pciInfo.listDevice(userInput);});
@@ -102,10 +118,22 @@ public class Main {
 		cpuMenu.setOption(1, () -> {cpuInfo.Coreinfo();});
 		cpuMenu.setOption(2, () -> {cpuInfo.showCpuUsage();});
 		cpuMenu.setOption(3, () -> {mainMenu.start(userInput);});
+
+		testUSBMenu.setOption(1, () -> {usbTests.printTestRoot(0);});
+		testUSBMenu.setOption(2, () -> {usbTests.printTestRoot(1);});
+		testUSBMenu.setOption(3, () -> {mainMenu.start(userInput);});
+
+		usbMenu.setOption(1, () -> {usbInfo.listUSBs();});
+		usbMenu.setOption(2, () -> {usbInfo.printSysRoot(2);});
+		usbMenu.setOption(3, () -> {usbInfo.printSysRoot(1);});
+		usbMenu.setOption(4, () -> {testUSBMenu.start(userInput);});
+		usbMenu.setOption(5, () -> {mainMenu.start(userInput);});
+
+		
 		
 		mainMenu.setOption(1, () -> {cpuMenu.start(userInput);});
 		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); 
-		mainMenu.setOption(3, () -> {usbInfo.usbDevices();});
+		mainMenu.setOption(3, () -> {usbMenu.start(userInput);});
 		mainMenu.setOption(4, () -> {pciMenu.start(userInput);}); 
 		mainMenu.setOption(5, () -> {
 			System.out.print("Thank you for using System Spec Analyser\n");
