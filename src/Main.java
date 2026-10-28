@@ -124,8 +124,8 @@ public class Main {
 		testUSBMenu.setOption(3, () -> {mainMenu.start(userInput);});
 
 		usbMenu.setOption(1, () -> {usbInfo.listUSBs();});
-		usbMenu.setOption(2, () -> {usbInfo.printSysRoot(1);});
-		usbMenu.setOption(3, () -> {usbInfo.printSysRoot(2);});
+		usbMenu.setOption(2, () -> {usbInfo.printSysRoot(2);});
+		usbMenu.setOption(3, () -> {usbInfo.printSysRoot(1);});
 		usbMenu.setOption(4, () -> {testUSBMenu.start(userInput);});
 		usbMenu.setOption(5, () -> {mainMenu.start(userInput);});
 
