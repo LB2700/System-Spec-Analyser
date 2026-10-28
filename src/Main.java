@@ -90,7 +90,7 @@ public class Main {
 		Menu testUSBMenu = new Menu(
 			"Options:\n" + 
 			"\t 1. No USB scenario\n" + 
-			"\t 2. Unrecognised USB scenario" + 
+			"\t 2. Unrecognised USB scenario\n" + 
 			"\t 3. Back\n\n", 3
 		);
 
