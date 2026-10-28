@@ -126,6 +126,39 @@ public class pciInfo
         return (int) sysFile.number(list().get(index).resolve("class"));
     }
 
+    /** The subsystem vendor ID, or -1 if it cannot be read. */
+    public static int getSubsystemVendor(int index)
+    {
+        return (int) sysFile.number(list().get(index).resolve("subsystem_vendor"));
+    }
+
+    /** The subsystem vendor ID, or -1 if it cannot be read. */
+   	public static int getSubsystemVendorId(int index)
+	{
+		return (int) sysFile.number(list().get(index).resolve("subsystem_vendor"));
+ 	}
+
+	/** The subsystem device ID, or -1 if it cannot be read. */
+ 	public static int getSubsystemDeviceId(int index) 
+ 	{
+ 		return (int) sysFile.number(list().get(index).resolve("subsystem_device"));
+ 	}
+
+ 	/** The IRQ number, or -1 if it cannot be read. */
+ 	public static int getIrq(int index) 
+ 	{
+ 		return (int) sysFile.number(list().get(index).resolve("irq"));
+ 	}
+
+	/** The revision ID, or -1 if it cannot be read. */
+ 	public static int getRevision(int index) 
+ 	{
+ 		return (int) sysFile.number(list().get(index).resolve("revision"));
+	}
+ 	
+    
+
+    
     public static void listVendors(Scanner scanner) {
 		// print list of vendors
 		// prompt user to select one
@@ -143,7 +176,7 @@ public class pciInfo
 		}
 
 
-		// enforce a valid vendor id as input, or return if empty string is inputted
+		// enforce a valid vendor id as input, or return if empty string is entered
 		Integer selectedVendorId;
 	
 		scanner.nextLine();
@@ -205,7 +238,7 @@ public class pciInfo
     	System.out.print("\t 3. Bus \n");
     	System.out.print("\t 4. None \n");
 
-		// enforce a valid vendor id as input, or return if empty string is inputted
+		// enforce a valid integer as input, or return if empty string is entered
 		Integer selectedSortingCriteria;
 	
 		scanner.nextLine();
@@ -272,7 +305,27 @@ public class pciInfo
    			}
    		}
 
-   		System.out.println(getAddress(selectedIndex));
+		
+		
+   		int vendor = getVendorId(selectedIndex);
+   		int device = getDeviceId(selectedIndex);
+
+		System.out.printf("\nShowing detailed view of device %04x \n\n", device);
+   		System.out.printf("  Device ID:            %04x\n" , device);
+		System.out.printf("  Device Name:          %s\n", Main.pci.deviceName(vendor, device));
+		System.out.printf("  Vendor ID:            %04x\n" , vendor);
+	   	System.out.printf("  Vendor Name:          %s\n", Main.pci.vendorName(device));
+   		System.out.printf("  Address:              %s\n" , getAddress(selectedIndex));
+   		System.out.printf("  Bus:                  %02x\n" , getBus(selectedIndex));
+   		System.out.printf("  Function:             %01x\n" , getFunction(selectedIndex));
+   		System.out.printf("  Class code:           %06x\n" , getClassCode(selectedIndex));
+		System.out.printf("  Subsystem Vendor ID:  %04x\n", getSubsystemVendorId(selectedIndex));
+		System.out.printf("  Subsystem Device ID:  %04x\n", getSubsystemDeviceId(selectedIndex));
+		System.out.printf("  Revision:             %02x\n", getRevision(selectedIndex));
+		System.out.printf("  IRQ:                  %d\n", getIrq(selectedIndex));
+   		
+   		
+   		
     
     	// print devices 
     	// prompt user to select one

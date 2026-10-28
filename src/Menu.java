@@ -1,7 +1,10 @@
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.NoSuchElementException;
 
 public class Menu {
+
+	public static String lineSeperator = "-".repeat(32) + "\n";
 
 	private String message;
 	private String invalidInputMessage;
@@ -38,14 +41,15 @@ public class Menu {
 
 		while (true) {
 			System.out.print(inputPromptMessage);
-			res = scanner.next();
+			//res = scanner.next();
 
 			/*
 			 first phase of input validation. If user doesn't input a valid integer then 
 			 exception is thrown and user in prompted to enter again
 			 */
 			try { 
-				selectedOption = Integer.parseInt(res);
+				//selectedOption = Integer.parseInt(res);
+				selectedOption = scanner.nextInt();
 			} catch (NumberFormatException e) {
 				System.out.print(invalidInputMessage);
 				continue;
@@ -60,8 +64,29 @@ public class Menu {
 				run the function linked to the selected option index. Not garunteed to be set. If 
 				an unset function is chosen by the user then the program will crash. 
 				 */
-				System.out.print("-------------------------------------------------\n");
+
+				System.out.print(Menu.lineSeperator);
+
+				// run selected option
 				menuOptions.get(selectedOption-1).run();
+
+				// pause until next input from user
+				System.out.print("\nPress enter to continue...\n");
+				scanner.nextLine();
+				try {
+					scanner.nextLine();
+				} catch (NoSuchElementException e) {
+					// The way scanner behaves seems inconsistant. 
+					// After a process from the PCI devices is finished, scanner.nextLine() is required to run twice
+					// For other processes it is required only once
+					// Causes exception in some cases too...
+				}
+
+				System.out.print(Menu.lineSeperator);
+
+				// re-run this menu
+				this.start(scanner);
+				
 			} else {
 				System.out.print(invalidInputMessage);
 				continue;
@@ -74,7 +99,13 @@ public class Menu {
 
 	// link a function to an option index
 	public void setOption(int index, Runnable optionMethod) {
-		menuOptions.set(index-1, optionMethod);
+		try {
+			menuOptions.set(index-1, optionMethod);
+		} catch (IndexOutOfBoundsException e) {
+			System.out.printf("Incorrect amount of options specified for this menu \n");
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 
 	public void setOnStart(Runnable onStart) {

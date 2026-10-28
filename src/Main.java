@@ -1,11 +1,13 @@
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Comparator;
 import java.util.Scanner;
+
 
 public class Main {
 
@@ -14,16 +16,13 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		ArrayList<Integer> usbByName = new ArrayList<>();
-		ArrayList<Integer> usbByBus = new ArrayList<>();
-
 		try {
 			usb = idLookup.usb();				
 		} catch (Exception error) {
 			System.out.println(error.getMessage());
 			error.printStackTrace();
 		}
-		usbDevices();
+		//usbDevices();
 
 		try {
 			pci = idLookup.pci();
@@ -38,6 +37,7 @@ public class Main {
 		// showCpuArch();
 		// showCpuModelName();
 		// showCpuUsage();
+		// showCpuTemperature();
 	
 
 		Scanner userInput = new Scanner(System.in);
@@ -46,11 +46,11 @@ public class Main {
 		Menu mainMenu = new Menu(
 			"Welcome to System Spec Analyser\n\n" + 
 			"Options:\n" +
-			"\t1. Processor\n" +
-			"\t2. Memory\n" + 
-			"\t3. USB Devices\n" +
-			"\t4. PCI Devices\n" +
-			"\t5. Quit\n\n", 5
+			"\t 1. Processor\n" +
+			"\t 2. Memory\n" + 
+			"\t 3. USB Devices\n" +
+			"\t 4. PCI Devices\n" +
+			"\t 5. Quit\n\n", 5
 		);
 
 		Menu pciMenu = new Menu(
@@ -66,7 +66,16 @@ public class Main {
 			"\t 1. Total Memory\n" + 
 			"\t 2. Total Used Memory\n" +
 			"\t 3. Percentage of Memory Used\n" +
-			"\t 4. Back\n\n", 4
+			"\t 4. Run cache performance investigation \n" +
+			"\t 5. Back\n\n", 5
+		);
+
+		Menu cpuMenu = new Menu(
+			"Options:\n" +
+			"\t 1. Show Core info\n" + 
+			"\t 2. Get Core load info\n" +
+			//"\t 5. Cpu temperature\n" +
+			"\t 3. Back\n\n", 3
 		);
 
 		pciMenu.setOption(1, () -> {pciInfo.listVendors(userInput);});
@@ -81,106 +90,41 @@ public class Main {
 		memoryMenu.setOption(1, () -> {memInfo.PrintTotalMemory();});
 		memoryMenu.setOption(2, () -> {memInfo.PrintTotalUsedMemory();});
 		memoryMenu.setOption(3, () -> {memInfo.PrintPercentageOfMemoryUsed();});
-		memoryMenu.setOption(4, () -> {mainMenu.start(userInput);});
+		memoryMenu.setOption(4, () -> {
+			try {
+				memInfo.cachePerformanceAnalysis(userInput);
+			} catch (FileNotFoundException e) {
+				System.out.printf("Error finding output directory. Please ensure ./output/csvFiles already exists \n");
+			}
+		});
+		memoryMenu.setOption(5, () -> {mainMenu.start(userInput);});
+
+		cpuMenu.setOption(1, () -> {cpuInfo.Coreinfo();});
+		cpuMenu.setOption(2, () -> {cpuInfo.showCpuUsage();});
+		cpuMenu.setOption(3, () -> {mainMenu.start(userInput);});
 		
+		mainMenu.setOption(1, () -> {cpuMenu.start(userInput);});
 		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); 
-		mainMenu.setOption(3, () -> {usbDevices();});
+		mainMenu.setOption(3, () -> {usbInfo.usbDevices();});
 		mainMenu.setOption(4, () -> {pciMenu.start(userInput);}); 
+		mainMenu.setOption(5, () -> {
+			System.out.print("Thank you for using System Spec Analyser\n");
+			System.exit(0);
+		});
+
 		mainMenu.start(userInput);
+
+// 		while (true) {
+// 			mainMenu.start(userInput);
+// 
+// 			System.out.print("\nPress enter to continue...\n");
+// 			userInput.nextLine();
+// 			userInput.nextLine();
+// 			
+// 			System.out.print(Menu.lineSeperator);			
+// 		}
 	}
 
-	public static long[] getCpuTimes(String coreInfo){
-		//Gets rid of empty space and splits into array
-		String[] arrayOfStrings = coreInfo.trim().split("\\s+");
-	
-		long idle = 0;
-		long busy = 0;
-
-		//e.g cpu 79242 0 74306 842486413 756859 6140 67701 0 ->  index 4 in array is idle (842486413)
-		final int IDLE_TIME_INDEX = 4;
-		
-		//turn each value into long and add the values together, exclude "cpu" -> i = 1 and exclude "idle" to find busy count
-		for (int i = 1; i < arrayOfStrings.length; i++) {
-			if (i != IDLE_TIME_INDEX){
-    	    	busy += Long.parseLong(arrayOfStrings[i]);
-			} else { 
-				idle = Long.parseLong(arrayOfStrings[IDLE_TIME_INDEX]);
-			}
-		}
-		long[] busyidle = {busy, idle};
-
-		return busyidle;
-	}
-
-	static void printUSBDevices(ArrayList<Integer> index) {
-		System.out.println("USB Devices: " + usbInfo.getCount());
-		for (int i : index) {
-			printUSBDevices(i);
-		}
-	}
-
-	static void printUSBDevices(int i) {
-		int vendor = usbInfo.getVendorId(i);
-		int product = usbInfo.getProductId(i);
-		System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s%n", usbInfo.getBusNumber(i),
-			                      usbInfo.getDeviceNumber(i), vendor, product,
-			                      usb.vendorName(vendor), usb.deviceName(vendor, product));
-	}
-
-	public static void usbDevices() {
-		// try {			
-		// 	System.out.println("USB devices: " + usbInfo.getCount());
-		// 	if (usbInfo.getCount() == 0) {
-		// 	    System.out.println("  No USB devices have been found");
-		// 	}
-		// 	else {
-		// 	    for (int i = 0; i < usbInfo.getCount(); i++) {
-		// 	    int vendor = usbInfo.getVendorId(i);
-		// 	    int product = usbInfo.getProductId(i);
-		// 	    System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s%n", usbInfo.getBusNumber(i),
-		// 	                      usbInfo.getDeviceNumber(i), vendor, product,
-		// 	                      usb.vendorName(vendor), usb.deviceName(vendor, product));           
-		// 	    }
-		// 	}
-		// } catch (Exception error) {
-		// 	System.out.println(error.getMessage());
-		// 	error.printStackTrace();
-		// }
-		ArrayList<Integer> usbByName = new ArrayList<>();
-		ArrayList<Integer> usbByBus = new ArrayList<>();
-		
-		try {
-			if (usbInfo.getCount() == 0) {
-				System.out.println("USB Devices: " + usbInfo.getCount());
-				System.out.println("  No USB devices have been found");
-			}
-			else {
-				for (int i = 0; i < usbInfo.getCount(); i++) {
-					usbByName.add(i);
-					usbByBus.add(i);
-				}				
-
-				usbByName.sort((a, b) -> 
-				{
-					return usbInfo.getVendorId(a) - usbInfo.getVendorId(b);
-				});
-				usbByBus.sort((a, b) -> 
-				{
-					return usbInfo.getBusNumber(a) - usbInfo.getBusNumber(b);
-				});
-
-				printUSBDevices(usbByBus);
-				printUSBDevices(usbByName);
-				
-			}
-		// } catch (IOException error) {
-		// 	System.out.println(error.getMessage());
-		// 	error.printStackTrace();
-	 	} catch (Exception error) {
-			System.out.println(error.getMessage());
-			error.printStackTrace();
-		}
-	}
 
 	public static void showCoreCount() {
 		System.out.println("Processors (cores) avaiable: " + Runtime.getRuntime().availableProcessors());
@@ -197,99 +141,15 @@ public class Main {
 		}
 	}
 
-	public static void showCpuArch() {
-		//Gets archeitecture, not what the requirements wants, even then it's something cool to add
-		System.out.println("You have: " + System.getProperty("os.arch"));
-	}
-
-	public static void showCpuModelName() {
-		try {
-			for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
-				if (i.startsWith("model name")) {
-				// cant just print the line as it shows up in the file
-				// "model name      : QEMU Virtual CPU version 2.5+"
-				// needs to extract the model name and print something better looking
-				// "Model Name: <MODEL_NAME>"
-					System.out.println(i);
-					break;
-				}
-			}
-		} catch (java.io.IOException error) {
-			System.out.println(error.getMessage());
-		}
-	}
-
-	public static void showCpuUsage() {
-		//https://support.checkpoint.com/results/sk/sk65143
-		int numOfCores = Runtime.getRuntime().availableProcessors();
-	
-		ArrayList<Double> coreLoads = new ArrayList<Double>();
-		ArrayList<Double> idleR1 = new ArrayList<Double>();
-		ArrayList<Double> busyR1 = new ArrayList<Double>();
-		ArrayList<Double> idleR2 = new ArrayList<Double>();
-		ArrayList<Double> busyR2 = new ArrayList<Double>();
-
-		try {
-			List<String> coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
-			for (int i = 0; i < (numOfCores + 1); i++){
-				
-				String coreInfo = coreInfoLines.get(i);
-				System.out.println(coreInfo);
-				
-				long[] firstRead = getCpuTimes(coreInfo);
-				double busy1 = (double)firstRead[0];
-				double idle1 = (double)firstRead[1];
-
-				busyR1.add(busy1);
-				idleR1.add(idle1);
-			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		
-		try {
-			Thread.sleep(1000);
-		} catch (Exception e){
-			System.out.println(e.getMessage());
-		}
-
-		try {
-			List<String> coreInfoLines = Files.readAllLines(Path.of("/proc/stat"));
-			for (int i = 0; i < (numOfCores + 1); i++){
-				
-				String coreInfo = coreInfoLines.get(i);
-				long[] secondRead = getCpuTimes(coreInfo);
-				double busy2 = (double)secondRead[0];
-				double idle2 = (double)secondRead[1];
-
-				busyR2.add(busy2);
-				idleR2.add(idle2);
-			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-
-		ArrayList<Double> busyDifference = new ArrayList<Double>();
-		ArrayList<Double> idleDifference = new ArrayList<Double>();
-		ArrayList<Double> loadRatio = new ArrayList<Double>();
-
-		for (int i = 0; i < idleR1.size(); i++) {
-			
-			busyDifference.add(busyR2.get(i) - busyR1.get(i));
-			idleDifference.add(idleR2.get(i) - idleR1.get(i));
-
-			double load = 100.0 * busyDifference.get(i) / (busyDifference.get(i) + idleDifference.get(i));
-			loadRatio.add(load);
-		}
-
-		double totalLoad = 0;
-		
-		for (int i = 1; i < loadRatio.size(); i++) {
-			System.out.println("Cpu: " + i + "has a load of " + loadRatio.get(i) + "%");
-			totalLoad += loadRatio.get(i);
-		}
-
-		double averageLoad = totalLoad / numOfCores;
-		System.out.println("Average Cpu load: " + averageLoad + "%");
+	public static void printPciDevice(Integer i) {
+		int vendor = pciInfo.getVendorId(i);
+		int device = pciInfo.getDeviceId(i);
+		System.out.printf("  %s  %04x:%04x  %s %s%n",
+			pciInfo.getAddress(i),
+			vendor,
+			device,
+			pci.vendorName(vendor),
+			pci.deviceName(vendor, device)
+		);
 	}
 }
