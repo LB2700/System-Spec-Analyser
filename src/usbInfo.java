@@ -184,6 +184,7 @@ public class usbInfo
                         break;
                     case 2:
                         printUSBDevices(usbByName);
+                        break;
                     default:
                         throw new AssertionError();
                 }
