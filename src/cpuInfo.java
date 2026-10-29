@@ -9,6 +9,7 @@ import java.io.File;
 
 public class cpuInfo {
     public static void showCoreCount() {
+		//prints number of cores available at runtime
 		System.out.println("There are " + Runtime.getRuntime().availableProcessors() + " processors (cores) avaiable");
 		
 		//try {
@@ -34,7 +35,7 @@ public class cpuInfo {
 				if (i.startsWith("model name")) {
 					//e.g Model Name : QEMU Virtual CPU version 2.5+ -> splits at colon ":", gets rid of extra space
 					//[1] selects part -> QEMU Virtual CPU version 2.5+ as index starts at 0
-					System.out.println("Your model is " + i.split(":")[1].trim());
+					System.out.print("Your model is " + i.split(":")[1].trim());
 					break;
 				}
 			}
@@ -114,16 +115,18 @@ public class cpuInfo {
 		
 			for (int i = 1; i < loadRatio.size(); i++) {
 				System.out.printf("Cpu: " + i + " has a load of %.2f%%%n", loadRatio.get(i));
+				System.out.println("")
 				totalLoad += loadRatio.get(i);
 			}
+			System.out.println("");
 			System.out.println("-----Average load------");
 			double averageLoad = totalLoad / numOfCores;
+
 			System.out.printf("Average Cpu load: %.2f%%%n", averageLoad);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
 	}
-
 
     public static void getLoad(ArrayList<Double> idleR, ArrayList<Double> busyR, String coreInfo) {
 		long[] busyidle = getCpuTimes(coreInfo);
@@ -146,7 +149,6 @@ public class cpuInfo {
     public static void Coreinfo() {
 
     	System.out.print("----Processor Information----\n\n");
-    	
 		showCoreCount();
 		showCpuModelName();
 		showCpuArch();
