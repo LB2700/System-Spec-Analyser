@@ -91,7 +91,8 @@ public class Main {
 			"Options:\n" + 
 			"\t 1. No USB scenario\n" + 
 			"\t 2. Unrecognised USB scenario\n" + 
-			"\t 3. Back\n\n", 3
+			"\t 3. Compare number of USBs to Unrecognised USB scenario\n" +
+			"\t 4. Back\n\n", 4
 		);
 
 		pciMenu.setOption(1, () -> {pciInfo.listVendors(userInput);});
@@ -121,7 +122,8 @@ public class Main {
 
 		testUSBMenu.setOption(1, () -> {usbTests.printTestRoot(0);});
 		testUSBMenu.setOption(2, () -> {usbTests.printTestRoot(1);});
-		testUSBMenu.setOption(3, () -> {usbMenu.start(userInput);});
+		testUSBMenu.setOption(3, () -> {usbTests.compareTestUSB();});
+		testUSBMenu.setOption(4, () -> {usbMenu.start(userInput);});
 
 		usbMenu.setOption(1, () -> {usbInfo.listUSBs();});
 		usbMenu.setOption(2, () -> {usbInfo.printSysRoot(2);});
