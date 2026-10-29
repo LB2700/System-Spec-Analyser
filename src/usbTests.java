@@ -20,4 +20,28 @@ public class usbTests
         usbInfo.setRoot(ROOTS[root]);
         usbInfo.usbDevices(1);      // uses the existing getVendorId, getBusNumber, etc.
     }
+
+    public static void compareTestUSB () {
+        int sysCount = usbInfo.getSysCount();
+        usbInfo.setRoot(ROOTS[1]);
+        int testCount = usbInfo.getCount();
+        if (sysCount > testCount) {
+            System.out.println("Your device has more USBs then the test case for USBs");
+            System.out.println("Your device has: " + sysCount);
+            System.out.println("The test case has: " + testCount);
+        }
+        else if (testCount > sysCount) {
+            System.out.println("Your device has less USBs then the test case for USBs");
+            System.out.println("Your device has: " + sysCount);
+            System.out.println("The test case has: " + testCount);
+        }
+        else {
+            System.out.println("Your device has the same number of USBs as the test case for USBs has");
+            System.out.println("Your device has: " + sysCount);
+            System.out.println("The test case has: " + testCount);
+        }
+        
+    }
+
+
 }
