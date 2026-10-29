@@ -152,32 +152,4 @@ public class Main {
 // 			System.out.print(Menu.lineSeperator);			
 // 		}
 	}
-
-
-	public static void showCoreCount() {
-		System.out.println("Processors (cores) avaiable: " + Runtime.getRuntime().availableProcessors());
-		
-		try {
-			for (String i : Files.readAllLines(Path.of("/proc/cpuinfo"))) {
-				if (i.startsWith("cpu cores")){
-					System.out.println("There are: " + i + " processers (cores)");
-					break;
-				}
-			}
-		} catch (IOException error) {
-			System.out.println(error.getMessage());
-		}
-	}
-
-	public static void printPciDevice(Integer i) {
-		int vendor = pciInfo.getVendorId(i);
-		int device = pciInfo.getDeviceId(i);
-		System.out.printf("  %s  %04x:%04x  %s %s%n",
-			pciInfo.getAddress(i),
-			vendor,
-			device,
-			pci.vendorName(vendor),
-			pci.deviceName(vendor, device)
-		);
-	}
 }
