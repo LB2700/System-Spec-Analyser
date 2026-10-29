@@ -11,8 +11,8 @@ import java.nio.file.Path;
 public class usbTests
 {
     private static final Path[] ROOTS = {
-        sysFile.path("SysProjectTestCases/NoUSBs"),
-        sysFile.path("SysProjectTestCases/FakeUSBs")
+        sysFile.path("assets/tests/NoUSBs"),
+        sysFile.path("assets/tests/FakeUSBs")
     };
 
     public static void printTestRoot(int root)
