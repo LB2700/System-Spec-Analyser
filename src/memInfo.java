@@ -78,7 +78,7 @@ public class memInfo
             System.out.println("Error reading memory information");
             return;
         }
-        System.out.println("Percentage of memory used: " + ((double) getUsed() / getTotal() * 100) + "%");
+        System.out.printf("Percentage of memory used: %.2f%%",((double) getUsed() / getTotal() * 100));
     }
 
 	public static void cachePerformanceAnalysis(Scanner scanner) throws FileNotFoundException

@@ -91,6 +91,8 @@ public class cpuInfo {
 				String coreInfo = coreInfoLines.get(i);
 				getLoad(idleR1, busyR1, coreInfo);
 			}
+
+			System.out.println("waiting...");
 			
 			Thread.sleep(1000);
 	
@@ -115,7 +117,6 @@ public class cpuInfo {
 		
 			for (int i = 1; i < loadRatio.size(); i++) {
 				System.out.printf("Cpu: " + i + " has a load of %.2f%%%n", loadRatio.get(i));
-				System.out.println("")
 				totalLoad += loadRatio.get(i);
 			}
 			System.out.println("");
