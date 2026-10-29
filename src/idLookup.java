@@ -63,13 +63,13 @@ public class idLookup
     /** Load pci.ids from the usual places: ./ids, then the system copies. */
     public static idLookup pci() throws IOException
     {
-        return find("pci.ids", "/usr/share/misc/pci.ids", "/usr/share/hwdata/pci.ids");
+        return find("assets/ids/pci.ids", "/usr/share/misc/pci.ids", "/usr/share/hwdata/pci.ids");
     }
 
     /** Load usb.ids from the usual places: ./ids, then the system copies. */
     public static idLookup usb() throws IOException
     {
-        return find("usb.ids", "/usr/share/misc/usb.ids", "/usr/share/hwdata/usb.ids",
+        return find("assets/ids/usb.ids", "/usr/share/misc/usb.ids", "/usr/share/hwdata/usb.ids",
                     "/var/lib/usbutils/usb.ids");
     }
 
