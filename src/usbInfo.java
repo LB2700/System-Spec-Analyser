@@ -123,6 +123,7 @@ public class usbInfo
 
     public static void printUSBDevices(ArrayList<Integer> index) {
     	System.out.println("USB Devices: " + usbInfo.getCount());
+        System.out.println("Your USB Devices: ");
     	for (int i : index) {
     		printUSBDevices(i);
     	}
@@ -131,9 +132,9 @@ public class usbInfo
     public static void printUSBDevices(int i) {
     	int vendor = usbInfo.getVendorId(i);
     	int product = usbInfo.getProductId(i);
-    	System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s%n", usbInfo.getBusNumber(i),
+    	System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s %s %s%n %s", usbInfo.getBusNumber(i),
     		                      usbInfo.getDeviceNumber(i), vendor, product,
-    		                      Main.usb.vendorName(vendor), Main.usb.deviceName(vendor, product));
+    		                      "\n\tVendor name:\t", Main.usb.vendorName(vendor), "\n\tDevice type:\t", Main.usb.deviceName(vendor, product), "\n");
     }
 
     public static void usbDevices(int sortCase) {
@@ -215,7 +216,12 @@ public class usbInfo
     }
 
     public static void listUSBs() {
-        System.out.println("There are " + getCount() + " USB devices in your machine"); 
+        System.out.println("There are " + getSysCount() + " USB devices in your machine"); 
+    }
+
+    public static int getSysCount() {
+        usbInfo.setRoot(OGROOT);
+        return getCount();
     }
 
 }
