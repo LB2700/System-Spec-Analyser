@@ -95,14 +95,9 @@ public class Main {
 			"\t 4. Back\n\n", 4
 		);
 
-		pciMenu.setOption(1, () -> {pciInfo.listVendors(userInput);});
-		pciMenu.setOption(2, () -> {pciInfo.listDevices(userInput);});
-		pciMenu.setOption(3, () -> {pciInfo.listDevice(userInput);});
-		pciMenu.setOption(4, () -> {mainMenu.start(userInput);});
-		pciMenu.setOnStart(() -> {
-			System.out.printf("Total Unique Vendors: %d \n", pciInfo.getVendorIds().size());
-			System.out.printf("Total Unique Devices: %d \n\n", pciInfo.getDeviceIds().size());	
-		});
+		cpuMenu.setOption(1, () -> {cpuInfo.Coreinfo();});
+		cpuMenu.setOption(2, () -> {cpuInfo.showCpuUsage();});
+		cpuMenu.setOption(3, () -> {mainMenu.start(userInput);});
 
 		memoryMenu.setOption(1, () -> {memInfo.PrintTotalMemory();});
 		memoryMenu.setOption(2, () -> {memInfo.PrintTotalUsedMemory();});
@@ -116,14 +111,14 @@ public class Main {
 		});
 		memoryMenu.setOption(5, () -> {mainMenu.start(userInput);});
 
-		cpuMenu.setOption(1, () -> {cpuInfo.Coreinfo();});
-		cpuMenu.setOption(2, () -> {cpuInfo.showCpuUsage();});
-		cpuMenu.setOption(3, () -> {mainMenu.start(userInput);});
-
-		testUSBMenu.setOption(1, () -> {usbTests.printTestRoot(0);});
-		testUSBMenu.setOption(2, () -> {usbTests.printTestRoot(1);});
-		testUSBMenu.setOption(3, () -> {usbTests.compareTestUSB();});
-		testUSBMenu.setOption(4, () -> {usbMenu.start(userInput);});
+		pciMenu.setOption(1, () -> {pciInfo.listVendors(userInput);});
+		pciMenu.setOption(2, () -> {pciInfo.listDevices(userInput);});
+		pciMenu.setOption(3, () -> {pciInfo.listDevice(userInput);});
+		pciMenu.setOption(4, () -> {mainMenu.start(userInput);});
+		pciMenu.setOnStart(() -> {
+			System.out.printf("Total Unique Vendors: %d \n", pciInfo.getVendorIds().size());
+			System.out.printf("Total Unique Devices: %d \n\n", pciInfo.getDeviceIds().size());	
+		});
 
 		usbMenu.setOption(1, () -> {usbInfo.listUSBs();});
 		usbMenu.setOption(2, () -> {usbInfo.printSysRoot(2);});
@@ -131,8 +126,11 @@ public class Main {
 		usbMenu.setOption(4, () -> {testUSBMenu.start(userInput);});
 		usbMenu.setOption(5, () -> {mainMenu.start(userInput);});
 
-		
-		
+		testUSBMenu.setOption(1, () -> {usbTests.printTestRoot(0);});
+		testUSBMenu.setOption(2, () -> {usbTests.printTestRoot(1);});
+		testUSBMenu.setOption(3, () -> {usbTests.compareTestUSB();});
+		testUSBMenu.setOption(4, () -> {usbMenu.start(userInput);});
+	
 		mainMenu.setOption(1, () -> {cpuMenu.start(userInput);});
 		mainMenu.setOption(2, () -> {memoryMenu.start(userInput);}); 
 		mainMenu.setOption(3, () -> {usbMenu.start(userInput);});
