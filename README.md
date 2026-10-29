@@ -7,9 +7,21 @@ server. Windows (including WSL2) and macOS do not provide these files.
 
 ## Build and run
 
+### Main application
+
     mkdir -p bin
     javac -d bin src/*.java
     java -cp bin Main
+
+### Graph Generation
+
+	To generate .svg graphs of the cache performance investigation run the following command from the root directory:
+
+	`python src/cacheGraphPlotter.py`
+
+	Enter the name of the output .svg file. Exclude the .svg file extension or file directory. All output from cacheGraphPlotter.py
+	will be saved in `output/graphs/`
+
 
 Run `java` from this folder, so that the `ids` folder is found.
 
